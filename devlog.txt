@@ -1,0 +1,2 @@
+hilaryZ -- 2020-04-27 21:33
+- Added initial design doc and structure to the repo
