@@ -1,2 +1,7 @@
 hilaryZ -- 2020-04-27 21:33
 - Added initial design doc and structure to the repo
+
+hilaryZ -- 2020-04-29 22:48
+- Updated the front-end framework of our design doc to show that the website will have multiple pages
+- Added more functionality (pie charts that break down world CO2 emissions by country) for the later deadline
+- Included another idea, graphs for each country's CO2 emissions, if we have extra time
