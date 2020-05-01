@@ -5,3 +5,7 @@ hilaryZ -- 2020-04-29 22:48
 - Updated the front-end framework of our design doc to show that the website will have multiple pages
 - Added more functionality (pie charts that break down world CO2 emissions by country) for the later deadline
 - Included another idea, graphs for each country's CO2 emissions, if we have extra time
+
+aliceN -- 2020-05-1 13:58
+- Added boostrap to the base and the home page
+- Expected by tonight to finish preliminary design and start working on d3
