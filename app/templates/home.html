@@ -5,4 +5,29 @@ Homepage
 {% endblock %}
 
 {% block body %}
+<br><br><br><br><br>
+<div class="p-3 container text-center bg-info">
+  <h1 class="text-white">Welcome to Green Graphs!</h1>
+  <h6 class="text-white">by Hilary Zen, Pratham Rawat, Leia Park & Alice Ni</h6>
+</div>
+
+<br><br>
+
+<div class="container text-center">
+  <form method="GET" action="/temp">
+    <button type="button" class="btn btn-primary btn-lg btn-block">Global Temperature Anomaly</button>
+  </form>
+  
+  <br>
+  <form method="GET" action="/carbon">
+    <button type="button" class="btn btn-primary btn-lg btn-block">Carbon Dioxide Emissions</button>
+  </form>
+  
+
+</div>
+
+
+
+
+
 {% endblock %}
