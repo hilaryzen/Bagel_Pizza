@@ -5,4 +5,46 @@ Average Temperature Anomaly
 {% endblock %}
 
 {% block body %}
+<svg id="temperatureAnomalyGraph">
+</svg>
+<script>
+    height = 500
+    width = 1500
+
+    const svg = d3.select("#temperatureAnomalyGraph")
+
+    //TODO: get data from file somehow
+    const anomalyData = []
+
+    xAxisData = anomalyData.forEach(d => d.date)
+    yAxisData = anomalyData.forEach(d => d.anomaly)
+
+    xAxisScale = d3.bandScale()
+        .domain(d3.range(xAxisData.length))
+        .range([0, width])
+
+    yAxisScale = d3.linearScale()
+        .domain([d3.min(yAxisData), d3.max(yAxisData)])
+        .range([0, height])
+
+    colorScale = d3.linearScale()
+        .domain([d3.min(yAxisData), d3.max(yAxisData)])
+        .range(["red", "green"])
+        .interpolate(d3.interpolateHcl);
+
+    svg
+        .attr("height", height)
+        .attr("width", width)
+
+    const bars = svg.selectAll("g")
+        .data(yAxisData)
+        .join("g")
+            .attr("transform", (d, i) => `translate(${xAxisScale(i)}, ${height - yAxisScale(d)})`);;
+
+    bars.append("rect")
+        .attr("fill", colorScale)
+        .attr("width", xAxisScale.bandwidth() - 1) // Sets a padding of one pixel between bars
+        .attr("height", yAxisScale);
+
+</script>
 {% endblock %}

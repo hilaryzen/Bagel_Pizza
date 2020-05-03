@@ -1,6 +1,16 @@
 from flask import Flask, render_template, request
 app = Flask(__name__)
 
+co2Emissions = {}
+globalTemp = {}
+usTemp = {}
+
+def importCSV(fileName):
+    return 5
+
+def importJSON(fileName):
+    return 5
+
 @app.route("/")
 def hello_world():
     return render_template("home.html")
