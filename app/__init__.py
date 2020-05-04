@@ -55,8 +55,8 @@ def compare():
 
 if __name__ == "__main__":
     app.debug = True
-    importUsTemp('app/static/us_temp.json')
+    importUsTemp('static/us_temp.json')
     #print(usTempValue)
     #print(usTempAnomaly)
-    importGlobalTemp('app/static/global_temp.json')
+    importGlobalTemp('static/global_temp.json')
     app.run()
