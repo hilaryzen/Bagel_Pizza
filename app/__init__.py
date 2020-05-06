@@ -44,8 +44,8 @@ def importGlobalCO2(filename):
             globalco2beta.append(row)
         globalco2beta.pop(0)
         for row in globalco2beta:
-            if int(row[0]) >= 1901 and int(row[0]) <= 2000:
-                globalco2[year] = float(row[2])
+            if int(row[0]) >= 1901 and int(row[0]) <= 2010:
+                globalco2[year] = float(row[1])
                 year += 1
 
 @app.route("/")
