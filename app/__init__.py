@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request
+import csv
 import json
 app = Flask(__name__)
 
-co2Emissions = {}
+globalco2 = {}
 
 # year: anomaly
 # {1901: -0.15, 1902: -0.25, etc}
@@ -34,6 +35,21 @@ def importGlobalTemp(fileName):
                 globalTemp[date] = float(data[i])
                 date += 1
 
+globalco2beta = []
+def importGlobalCO2(filename):
+    with open(filename, 'r') as file:
+        data = csv.reader(file)
+        year = 1901
+        x = 0
+        for row in data:
+            if x == 0: x += 1
+            else: globalco2beta.append(row)
+        #globalco2beta.pop(0)
+        for row in globalco2beta:
+            if int(row[0]) >= 1901 and int(row[0]) <= 2010:
+                globalco2[year] = float(row[1])
+                year += 1
+
 @app.route("/")
 def hello_world():
     return render_template("home.html")
@@ -44,7 +60,8 @@ def temperature():
 
 @app.route("/emissions")
 def emissions():
-    return render_template("carbon.html")
+    importGlobalCO2("static/co2-global.csv")
+    return render_template("carbon.html", globalEmissions = globalco2)
 
 @app.route("/compare")
 def compare():
