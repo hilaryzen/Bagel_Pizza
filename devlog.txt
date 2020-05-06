@@ -14,3 +14,8 @@ aliceN -- 2020-05-06 13:29
 - Finished Carbon Emissions graphs, just need the CSV reader function to get the ranges working
 - Trying to implement a highlight and zoom function for the line graph
 - Soon will start work on comparison graphs
+
+leiaP -- 2020-05-06 14:21
+- Added CSV reader function for global CO2 Emissions into main python file
+- CSV reader function and possibly assist functions still in progress for singular country CO2 emissions
+- Planning on creating separate python file for assist functions solely
