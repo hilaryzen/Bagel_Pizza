@@ -5,46 +5,90 @@ Average Temperature Anomaly
 {% endblock %}
 
 {% block body %}
+<script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
 <svg id="temperatureAnomalyGraph">
 </svg>
 <script>
-    height = 500
-    width = 1500
+    height = 650
+    width = 1300
 
     const svg = d3.select("#temperatureAnomalyGraph")
 
-    //TODO: get data from file somehow
-    const anomalyData = []
+    svg.append("text")
+	  .attr("transform", "translate(100,0)")
+	  .attr("x", 400)
+	  .attr("y", 50)
+	  .attr("font-size", "28px")
+	  .text("Global Temperature Anomaly")
 
-    xAxisData = anomalyData.forEach(d => d.date)
-    yAxisData = anomalyData.forEach(d => d.anomaly)
 
-    xAxisScale = d3.bandScale()
+    const anomalyData = {{ globalTemp }}
+
+    console.log(anomalyData)
+
+    xAxisData = Object.keys(anomalyData)
+    yAxisData = Object.values(anomalyData)
+
+    xAxisScale = d3.scaleBand()
         .domain(d3.range(xAxisData.length))
-        .range([0, width])
+        .range([0, width - 100])
 
-    yAxisScale = d3.linearScale()
+    yAxisScale = d3.scaleLinear()
         .domain([d3.min(yAxisData), d3.max(yAxisData)])
-        .range([0, height])
+        .range([0, height / 2])
 
-    colorScale = d3.linearScale()
+    yAxisLabelScale = d3.scaleLinear()
         .domain([d3.min(yAxisData), d3.max(yAxisData)])
-        .range(["red", "green"])
+        .range([0, -height / 2])
+
+    colorScale = d3.scaleLinear()
+        .domain([d3.min(yAxisData), d3.max(yAxisData)])
+        .range(["green", "red"])
         .interpolate(d3.interpolateHcl);
 
     svg
         .attr("height", height)
         .attr("width", width)
 
+    let negativo = function(value) {
+        if(value < 0) {
+            return height / 2
+        }
+        return height / 2 - yAxisScale(value)
+    }
+
     const bars = svg.selectAll("g")
         .data(yAxisData)
         .join("g")
-            .attr("transform", (d, i) => `translate(${xAxisScale(i)}, ${height - yAxisScale(d)})`);;
+            .attr("transform", (d, i) => `translate(${xAxisScale(i) + 50}, ${negativo(d) + 100})`);;
 
     bars.append("rect")
         .attr("fill", colorScale)
-        .attr("width", xAxisScale.bandwidth() - 1) // Sets a padding of one pixel between bars
+        .attr("width", xAxisScale.bandwidth() - 1)
         .attr("height", yAxisScale);
 
+    yAxis = svg.append("g")
+        .call(d3.axisLeft(yAxisLabelScale))
+            .attr("transform", "translate(50, 558)")
+        .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("dy", "-4.5em")
+        .attr("dx", "-4.0em")
+        .attr("font-size", "14px")
+            .attr("stroke", "black")
+            .text("Global Temperature Anomaly")
+
 </script>
+
+<style>
+    svg {
+        position: relative;
+        top: 100px;
+        margin-left: 50px;
+        margin-right: auto;
+        border-color: black;
+        border-style: solid;
+        border-width: 2px;
+    }
+</style>
 {% endblock %}

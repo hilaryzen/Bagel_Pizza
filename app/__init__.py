@@ -15,9 +15,6 @@ usTempValue = {}
 # {1901: -0.15, 1902: -0.43, etc}
 usTempAnomaly = {}
 
-def importCSV(fileName):
-    return 5
-
 def importUsTemp(fileName):
     with open(fileName, 'r') as file:
         data = json.loads(file.read())['data']
