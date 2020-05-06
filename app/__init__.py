@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import csv
 import json
 app = Flask(__name__)
 
@@ -57,7 +58,8 @@ def temperature():
 
 @app.route("/emissions")
 def emissions():
-    return render_template("carbon.html")
+    importGlobalCO2("static/co2-global.csv")
+    return render_template("carbon.html", globalEmissions = globalco2)
 
 @app.route("/compare")
 def compare():
