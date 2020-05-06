@@ -40,9 +40,11 @@ def importGlobalCO2(filename):
     with open(filename, 'r') as file:
         data = csv.reader(file)
         year = 1901
+        x = 0
         for row in data:
-            globalco2beta.append(row)
-        globalco2beta.pop(0)
+            if x == 0: x += 1
+            else: globalco2beta.append(row)
+        #globalco2beta.pop(0)
         for row in globalco2beta:
             if int(row[0]) >= 1901 and int(row[0]) <= 2010:
                 globalco2[year] = float(row[1])
