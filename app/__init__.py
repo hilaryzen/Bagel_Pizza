@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import json
 app = Flask(__name__)
 
-co2Emissions = {}
+globalco2 = {}
 
 # year: anomaly
 # {1901: -0.15, 1902: -0.25, etc}
@@ -14,9 +14,6 @@ usTempValue = {}
 # year: anomaly
 # {1901: -0.15, 1902: -0.43, etc}
 usTempAnomaly = {}
-
-def importCSV(fileName):
-    return 5
 
 def importUsTemp(fileName):
     with open(fileName, 'r') as file:
@@ -36,6 +33,19 @@ def importGlobalTemp(fileName):
             if int(i) >= 1901 and int(i) <= 2000:
                 globalTemp[date] = float(data[i])
                 date += 1
+
+globalco2beta = []
+def importGlobalCO2(filename):
+    with open(filename, 'r') as file:
+        data = csv.reader(file)
+        year = 1901
+        for row in data:
+            globalco2beta.append(row)
+        globalco2beta.pop(0)
+        for row in globalco2beta:
+            if int(row[0]) >= 1901 and int(row[0]) <= 2000:
+                globalco2[year] = float(row[2])
+                year += 1
 
 @app.route("/")
 def hello_world():
