@@ -37,10 +37,16 @@ python3 -m venv myvenv
 pip3 install flask
 ```
 
+3. Move into the app folder.
+
+```
+cd app
+```
+
 4. Run the website with:
 
 ```
-python3 app/__init__.py
+python3 __init__.py
 ```
 
 5. Go to http://localhost:5000/ to view Green Graphs!
