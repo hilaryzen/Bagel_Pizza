@@ -19,3 +19,10 @@ leiaP -- 2020-05-06 14:21
 - Added CSV reader function for global CO2 Emissions into main python file
 - CSV reader function and possibly assist functions still in progress for singular country CO2 emissions
 - Planning on creating separate python file for assist functions solely
+
+aliceN -- 2020-05-05 00:01
+- Added two side by side graphs in the Comparison page with cool functionalities 
+- A few things must be fixed: X-axes for both graphs, y-axis for temperature graph
+- Will add an option for the user to combine the two graphs
+- In carbon.html, must also fix the axis and hopefully get the brushing to work
+- To-do: add descriptions for graphs, proper labels, and short instructions on how to interact with the graphs
