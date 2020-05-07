@@ -1,8 +1,429 @@
 {% extends "base.html" %}
 
 {% block title %}
-Compare all data
+Comparison Graphs
 {% endblock %}
 
 {% block body %}
+<br><br><br><br>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<center>
+  <button class="btn btn-success" id="change">Go Forward 10 Years</button>
+  <button class="btn btn-success" id="change2">Go Back 10 Years</button>
+  <br><br>
+  <p id="space"></p>
+</center>
+
+<script>
+
+  var svg, x, y;
+  var year = 1901;
+  var alledata = {{ globalEmissions }}
+  var alltdata = {{ globalTemp }}
+
+  var pick = function (obj, props) {
+
+      'use strict';
+
+      // Make sure object and properties are provided
+      if (!obj || !props) return;
+
+      // Create new object
+      var picked = {};
+
+      // Loop through props and push to new object
+      props.forEach(function(prop) {
+	  picked[prop] = obj[prop];
+      });
+
+      // Return new object
+      return picked;
+
+  };
+
+  var create_dict = function(data, y) {
+      var dict = [];
+      for(i = 0; i < Object.keys(data).length; i++) {
+	  dict[i] = { "Year" : Object.keys(data)[i], "Total" : data[y] }
+	  y++;;
+      }
+      return dict;
+  }
+
+
+  var render_line_chart = function(e) {
+
+      //console.log(alledata);
+      //console.log(alltdata);
+
+      var edatas = pick(alledata, [year, year+1, year+2, year+3, year+4,
+				   year+5, year+6, year+7, year+8, year+9]);
+      var tdatas = pick(alltdata, [year, year+1, year+2, year+3, year+4, year+5,
+				   year+6, year+7, year+8, year+9]);
+
+      //console.log(edata);
+      //console.log(tdata);
+      
+      var edata = create_dict(edatas, year);
+      var tdata = create_dict(tdatas, year);
+      
+      //console.log(edata);
+      //console.log(Object.keys(edata).length);
+      //console.log(d3.extent(edata, function(d) { return +d.Year; }));
+      //console.log(edata[0]);
+
+      console.log(tdata);
+
+      var margin = {top: 50, right: 100, bottom: 60, left: 100},
+	  width = 600 - margin.left - margin.right,
+	  height = 400 - margin.top - margin.bottom;
+
+      svg = d3.select("#space")
+	  .append("svg")
+	  .attr("width", width + margin.left + margin.right)
+	  .attr("height", height + margin.top + margin.bottom)
+	  .attr("style", "border:4px solid green")
+	  .append("g")
+	  .attr("transform",
+		"translate(" + margin.left + "," + margin.top + ")");
+
+      x = d3.scaleTime()
+      //.domain(d3.extent(edata, function(d) { return d.Year; }))
+	  .domain([d3.min(edata, function(d) { return +d.Year; }),
+		   d3.max(edata, function(d) { return +d.Year; })])
+	  .range([ 0, width ]);
+      svg.append("g")
+	  .attr("transform", "translate(0," + height + ")")
+	  //.attr("class", "xaxis")
+	  .call(d3.axisBottom(x))
+	  .append("text")
+	  .attr("font-size", "10px")
+	  .attr("x", 200)
+	  .attr("y", 35)
+          .attr("stroke", "black")
+          .text("Years");
+
+      y = d3.scaleLinear()
+	  .domain([0, d3.max(edata, function(d) { return +d.Total; })])
+	  .range([ height, 0 ]);
+      svg.append("g")
+	  .attr("class", "yaxis")
+	  .call(d3.axisLeft(y))
+	  .append("text")
+	  .attr("transform", "rotate(-90)")
+          .attr("dy", "-4.5em")
+	  .attr("dx", "-4.0em")
+	  .attr("font-size", "10px")
+          .attr("stroke", "black")
+          .text("Total carbon emissions (million metric tons of C)");
+	  
+
+      svg.append("path")
+	  .datum(edata)
+	  .attr("class", "line")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return x(d.Year) })
+		.y(function(d) { return y(+d.Total) }))
+	  .attr("stroke", "green")
+	  .attr("stroke-width", 2);
+      
+      svg.selectAll(".green.dot")
+	  .data(edata)
+	  .enter().append("circle")
+	  .attr("class", "green dot")
+	  .attr("class", "dot") 
+	  .attr("cx", function(d) { return x(d.Year) })
+	  .attr("cy", function(d) { return y(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "green");
+
+      /// TEMPERATURE ///
+
+      svg2 = d3.select("#space")
+	  .append("svg")
+	  .attr("width", width + margin.left + margin.right)
+	  .attr("height", height + margin.top + margin.bottom)
+	  .attr("style", "border:4px solid green")
+	  .append("g")
+	  .attr("transform",
+		"translate(" + margin.left + "," + margin.top + ")");
+
+      x2 = d3.scaleTime()
+	  .domain(d3.extent(tdata, function(d) { return d.Year; }))
+	  .range([ 0, width ]);
+      svg2.append("g")
+	  .attr("transform", "translate(0," + height + ")")
+      //.attr("class", "xaxis")
+	  .call(d3.axisBottom(x2))
+	  .append("text")
+	  .attr("font-size", "10px")
+	  .attr("x", 200)
+	  .attr("y", 35)
+          .attr("stroke", "black")
+          .text("Years");
+
+      y2 = d3.scaleLinear()
+      //.domain([0, d3.max(tdata, function(d) { return +d.Total; })])
+	  .domain(d3.extent(tdata, function(d) { return +d.Total; }))
+	  .range([ height, 0 ]);
+      svg2.append("g")
+	  .attr("class", "y axis axis2")
+	  .call(d3.axisLeft(y2))
+	  .append("text")
+	  .attr("transform", "rotate(-90)")
+          .attr("dy", "-4.5em")
+	  .attr("dx", "-4.0em")
+	  .attr("font-size", "10px")
+          .attr("stroke", "black")
+          .text("Global Average Temperature Anomaly (Celsius)");
+
+       svg2.append("path")
+	  .datum(tdata)
+	  .attr("class", "line")
+	  //.attr("class", "orange dot")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return x(d.Year) })
+		.y(function(d) { return y2(+d.Total) }))
+	  .attr("stroke", "orange")
+	  .attr("stroke-width", 2);
+
+      svg2.selectAll(".dot")
+	  .data(tdata)
+	  .enter().append("circle")
+	  //.attr("class", "orange dot")
+	  .attr("class", "dot") 
+	  .attr("cx", function(d) { return x2(d.Year) })
+	  .attr("cy", function(d) { return y2(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "orange");
+      
+
+  }
+
+  var go_forward = function(e) {
+      if (year + 10 <= 2010) year += 10;
+      var edatas = pick(alledata, [year, year+1, year+2, year+3, year+4,
+				   year+5, year+6, year+7, year+8, year+9]);
+      var tdatas = pick(alltdata, [year, year+1, year+2, year+3, year+4,
+				   year+5, year+6, year+7, year+8, year+9]);
+
+      var edata = create_dict(edatas, year);
+      var tdata = create_dict(tdatas, year);
+      console.log(d3.min(edata, function(d) { return d.Year; }));
+      console.log(d3.max(edata, function(d) { return d.Year; }));
+      
+
+      console.log(edata);
+      
+      //x.domain(d3.extent(edata, function(d) { return +d.Year; }));
+      x.domain([d3.min(edata, function(d) { return d.Year; }),
+		d3.max(edata, function(d) { return d.Year; })]);
+      svg.select(".xaxis")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisBottom(x));
+
+      x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
+      svg2.select(".xaxis")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisBottom(x2));
+
+      y.domain([0, d3.max(edata, function(d) { return +d.Total; })]);
+      svg.select(".yaxis")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisLeft(y));
+
+      y2.domain(d3.extent(tdata, function(d) { return +d.Total; }));
+      svg2.select(".yaxis")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisLeft(y2));
+
+      var lines = svg.selectAll(".line")
+	  .datum(edata);
+
+      lines
+	  .enter().append("path")
+	  .datum(edata)
+	  .attr("class", "line")
+	  .merge(lines)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return x(+d.Year) })
+		.y(function(d) { return y(+d.Total) }))
+          .attr("stroke", "green")
+          .attr("stroke-width", 2);
+
+      var lines2 = svg2.selectAll(".line")
+	  .datum(tdata);
+
+      lines2
+	  .enter().append("path")
+	  .datum(tdata)
+	  .attr("class", "line")
+	  .merge(lines2)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return x2(+d.Year) })
+		.y(function(d) { return y2(+d.Total) }))
+          .attr("stroke", "orange")
+          .attr("stroke-width", 2);
+
+      var dots = svg.selectAll(".dot")
+	  .data(edata);
+
+      dots
+	  .enter().append("circle")
+	  .attr("class", "dot")
+	  .attr("class", "green dot")
+	  .merge(dots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return x(d.Year) })
+	  .attr("cy", function(d) { return y(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "green");
+
+      var dots2 = svg2.selectAll(".dot")
+	  .data(tdata);
+
+      dots2
+	  .enter().append("circle")
+	  .attr("class", "dot")
+	  //.attr("class", "orange dot")
+	  .merge(dots2)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return x2(d.Year) })
+	  .attr("cy", function(d) { return y2(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "orange");
+      
+  };
+
+  var go_back = function(e) {
+      if (year - 10 >= 1901) year -= 10;
+      var edatas = pick(alledata, [year, year+1, year+2, year+3, year+4,
+				   year+5, year+6, year+7, year+8, year+9]);
+       var tdatas = pick(alltdata, [year, year+1, year+2, year+3, year+4,
+				   year+5, year+6, year+7, year+8, year+9]);
+
+      var edata = create_dict(edatas, year);
+      var tdata = create_dict(tdatas, year);
+      //console.log(edata);
+
+      x.domain(d3.extent(edata, function(d) { return +d.Year; }));
+      svg.select(".xaxis")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisBottom(x));
+
+      y.domain([0, d3.max(edata, function(d) { return +d.Total; })]);
+      svg.select(".yaxis")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisLeft(y));
+
+      var lines = svg.selectAll(".line")
+	  .datum(edata);
+
+      lines
+	  .enter().append("path")
+	  .datum(edata)
+	  .attr("class", "line")
+	  .merge(lines)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return x(+d.Year) })
+		.y(function(d) { return y(+d.Total) }))
+          .attr("stroke", "green")
+          .attr("stroke-width", 2);
+
+      var dots = svg.selectAll(".dot")
+	  .data(edata);
+
+      dots
+	  .enter().append("circle")
+	  .attr("class", "dot")
+	  .merge(dots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return x(d.Year) })
+	  .attr("cy", function(d) { return y(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "green");
+
+      x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
+      svg2.select(".xaxis")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisBottom(x2));
+
+
+      y2.domain(d3.extent(tdata, function(d) { return +d.Total; }));
+      svg2.select(".yaxis")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisLeft(y2));
+
+
+      var lines2 = svg2.selectAll(".line")
+	  .datum(tdata);
+
+      lines2
+	  .enter().append("path")
+	  .datum(tdata)
+	  .attr("class", "line")
+	  .merge(lines2)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return x2(+d.Year) })
+		.y(function(d) { return y2(+d.Total) }))
+          .attr("stroke", "orange")
+          .attr("stroke-width", 2);
+
+      var dots2 = svg2.selectAll(".dot")
+	  .data(tdata);
+
+      dots2
+	  .enter().append("circle")
+	  .attr("class", "dot")
+      //.attr("class", "orange dot")
+	  .merge(dots2)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return x2(d.Year) })
+	  .attr("cy", function(d) { return y2(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "orange");
+      
+      
+  };
+
+  render_line_chart();
+
+  var scrollforward = document.getElementById("change");
+  scrollforward.addEventListener('click', go_forward);
+
+  var scrollbackward = document.getElementById("change2");
+  scrollbackward.addEventListener('click', go_back);
+
+</script>
+
+
+
+
 {% endblock %}

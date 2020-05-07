@@ -31,7 +31,7 @@ def importGlobalTemp(fileName):
         data = json.loads(file.read())['data']
         date = 1901
         for i in data:
-            if int(i) >= 1901 and int(i) <= 2000:
+            if int(i) >= 1901 and int(i) <= 2010:
                 globalTemp[date] = float(data[i])
                 date += 1
 
@@ -44,7 +44,7 @@ def importGlobalCO2(filename):
         for row in data:
             if x == 0: x += 1
             else: globalco2beta.append(row)
-        #globalco2beta.pop(0)
+            #globalco2beta.pop(0)
         for row in globalco2beta:
             if int(row[0]) >= 1901 and int(row[0]) <= 2010:
                 globalco2[year] = float(row[1])
