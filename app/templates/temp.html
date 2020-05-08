@@ -20,7 +20,7 @@ Average Temperature Anomaly
 	  .attr("x", 400)
 	  .attr("y", 50)
 	  .attr("font-size", "28px")
-	  .text("Global Temperature Anomaly")
+	  .text("Global Temperature Anomaly 1901-2010")
 
 
     const anomalyData = {{ globalTemp }}
@@ -30,13 +30,25 @@ Average Temperature Anomaly
     xAxisData = Object.keys(anomalyData)
     yAxisData = Object.values(anomalyData)
 
+    xAxisData.forEach(d => parseInt(d))
+    yAxisData.forEach(d => parseFloat(d))
+
     xAxisScale = d3.scaleBand()
         .domain(d3.range(xAxisData.length))
-        .range([0, width - 100])
+        .range([0, width - 200])
 
-    yAxisScale = d3.scaleLinear()
-        .domain([d3.min(yAxisData), d3.max(yAxisData)])
-        .range([0, height / 2])
+    yPositiveAxisScale = d3.scaleLinear()
+        .domain([0, d3.max(yAxisData)])
+        .range([0, 206])
+
+    yNegativeAxisScale = d3.scaleLinear()
+        .domain([0, -d3.min(yAxisData)])
+        .range([0, 118])
+
+    yScale = function(d, i) {
+
+    }
+
 
     yAxisLabelScale = d3.scaleLinear()
         .domain([d3.min(yAxisData), d3.max(yAxisData)])
@@ -44,7 +56,7 @@ Average Temperature Anomaly
 
     colorScale = d3.scaleLinear()
         .domain([d3.min(yAxisData), d3.max(yAxisData)])
-        .range(["green", "red"])
+        .range(["skyblue", "red"])
         .interpolate(d3.interpolateHcl);
 
     svg
@@ -55,36 +67,39 @@ Average Temperature Anomaly
         if(value < 0) {
             return height / 2
         }
-        return height / 2 - yAxisScale(value)
+        return height / 2 - yPositiveAxisScale(value)
     }
 
     const bars = svg.selectAll("g")
         .data(yAxisData)
         .join("g")
-            .attr("transform", (d, i) => `translate(${xAxisScale(i) + 50}, ${negativo(d) + 100})`);;
+            .attr("transform", (d, i) => `translate(${xAxisScale(i) + 100}, ${negativo(d) + 100})`);;
 
     bars.append("rect")
         .attr("fill", colorScale)
         .attr("width", xAxisScale.bandwidth() - 1)
-        .attr("height", yAxisScale);
+        .attr("height", d => {
+            if(d > 0) return yPositiveAxisScale(d)
+            else return yNegativeAxisScale(-d)
+        });
 
     yAxis = svg.append("g")
         .call(d3.axisLeft(yAxisLabelScale))
-            .attr("transform", "translate(50, 558)")
+            .attr("transform", "translate(100, 550)")
         .append("text")
             .attr("transform", "rotate(-90)")
-            .attr("dy", "-4.5em")
-        .attr("dx", "-4.0em")
-        .attr("font-size", "14px")
+            .attr("dy", "-3.5em")
+            .attr("dx", "25em")
+            .attr("font-size", "14px")
             .attr("stroke", "black")
-            .text("Global Temperature Anomaly")
+            .text("Global Temperature Anomaly (% difference from baseline)")
 
     var tip = d3.tip()
 	  .attr('class', 'd3-tip')
 	  .offset([-10, 0])
 	  .html(function(d, i) {
           console.log("bruh")
-	      return "<strong>" + +xAxisData[i] + ":</strong> <span style='color:red'>" + +yAxisData[i] + "</span>";
+	      return "<strong>" + +xAxisData[i] + ":</strong> <span style='color:#ff0000'>" + +yAxisData[i] + "</span>";
 	  });
 
     svg.call(tip);
