@@ -176,20 +176,20 @@ CO2 Emissions
           .text("Years");
 
       pyScale = d3.scaleLinear()
-	  .domain([0, d3.max(cdata, function(d) { return +d.Total; })])
-	  .range([height, 0])
-	  .nice();
-      yAxis = p.append("g")
-	  .attr("class", "yaxis")
-	  .attr("x", -50)
-	  .call(d3.axisLeft(pyScale))
-	  .append("text")
-	  .attr("transform", "rotate(-90)")
-          .attr("dy", "-4.5em")
-	  .attr("dx", "-4.0em")
-	  .attr("font-size", "10px")
-          .attr("stroke", "black")
-          .text("Total carbon emissions (million metric tons of C)");
+        .domain([0, d3.max(cdata, function(d) { return +d.Total; })])
+        .range([height, 0])
+        .nice();
+        yAxis = p.append("g")
+        .attr("class", "yaxis")
+        .attr("x", -50)
+        .call(d3.axisLeft(pyScale))
+        .append("text")
+        .attr("transform", "rotate(-90)")
+            .attr("dy", "-4.5em")
+        .attr("dx", "-4.0em")
+        .attr("font-size", "10px")
+            .attr("stroke", "black")
+            .text("Total carbon emissions (million metric tons of C)");
 
       var clip = p.append("defs").append("svg:clipPath")
               .attr("id", "clip")
