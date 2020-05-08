@@ -13,6 +13,9 @@ Comparison Graphs
   <button class="btn btn-success" id="change2">Go Back 10 Years</button>
   <br><br>
   <p id="space"></p>
+  <br><br>
+  WORK IN PROGRESS WORK IN PROGRESS WORK IN PROGRESS
+  <p id="space2"></p>
 </center>
 
 <script>
@@ -51,7 +54,11 @@ Comparison Graphs
       return dict;
   }
 
-
+  var parseTime = function(m) {
+      return { date : d3.timeParse("%Y")(+m.Year), Total : +m.Total }
+  };
+	     
+	 
   var render_line_chart = function(e) {
 
       //console.log(alledata);
@@ -90,12 +97,13 @@ Comparison Graphs
 
       x = d3.scaleTime()
       //.domain(d3.extent(edata, function(d) { return d.Year; }))
-	  .domain([d3.min(edata, function(d) { return +d.Year; }),
-		   d3.max(edata, function(d) { return +d.Year; })])
+	  .domain([d3.min(edata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
+      		   d3.max(edata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
+	  //.domain(d3.extent(edata, function(m) { return m.date; }))
 	  .range([ 0, width ]);
       svg.append("g")
 	  .attr("transform", "translate(0," + height + ")")
-	  //.attr("class", "xaxis")
+	  .attr("class", "chickens")
 	  .call(d3.axisBottom(x))
 	  .append("text")
 	  .attr("font-size", "10px")
@@ -124,7 +132,7 @@ Comparison Graphs
 	  .attr("class", "line")
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return x(d.Year) })
+		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y(+d.Total) }))
 	  .attr("stroke", "green")
 	  .attr("stroke-width", 2);
@@ -134,7 +142,7 @@ Comparison Graphs
 	  .enter().append("circle")
 	  .attr("class", "green dot")
 	  .attr("class", "dot") 
-	  .attr("cx", function(d) { return x(d.Year) })
+	  .attr("cx", function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill", "green");
@@ -151,11 +159,11 @@ Comparison Graphs
 		"translate(" + margin.left + "," + margin.top + ")");
 
       x2 = d3.scaleTime()
-	  .domain(d3.extent(tdata, function(d) { return d.Year; }))
+	  .domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
 	  .range([ 0, width ]);
       svg2.append("g")
 	  .attr("transform", "translate(0," + height + ")")
-      //.attr("class", "xaxis")
+	  .attr("class", "horses")
 	  .call(d3.axisBottom(x2))
 	  .append("text")
 	  .attr("font-size", "10px")
@@ -169,7 +177,7 @@ Comparison Graphs
 	  .domain(d3.extent(tdata, function(d) { return +d.Total; }))
 	  .range([ height, 0 ]);
       svg2.append("g")
-	  .attr("class", "y axis axis2")
+	  .attr("class", "sheep")
 	  .call(d3.axisLeft(y2))
 	  .append("text")
 	  .attr("transform", "rotate(-90)")
@@ -185,7 +193,7 @@ Comparison Graphs
 	  //.attr("class", "orange dot")
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return x(d.Year) })
+		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y2(+d.Total) }))
 	  .attr("stroke", "orange")
 	  .attr("stroke-width", 2);
@@ -195,7 +203,7 @@ Comparison Graphs
 	  .enter().append("circle")
 	  //.attr("class", "orange dot")
 	  .attr("class", "dot") 
-	  .attr("cx", function(d) { return x2(d.Year) })
+	  .attr("cx", function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y2(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill", "orange");
@@ -219,15 +227,19 @@ Comparison Graphs
       console.log(edata);
       
       //x.domain(d3.extent(edata, function(d) { return +d.Year; }));
-      x.domain([d3.min(edata, function(d) { return d.Year; }),
-		d3.max(edata, function(d) { return d.Year; })]);
-      svg.select(".xaxis")
+      //x.domain([d3.min(edata, function(d) { return +d.Year; }),
+      //	d3.max(edata, function(d) { return +d.Year; })]);
+      x.domain([d3.min(edata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
+      		d3.max(edata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
+      svg.select(".chickens")
 	  .transition()
 	  .duration(2000)
 	  .call(d3.axisBottom(x));
 
-      x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
-      svg2.select(".xaxis")
+      //x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
+      x2.domain([d3.min(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
+      		 d3.max(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
+      svg2.select(".horses")
 	  .transition()
 	  .duration(2000)
 	  .call(d3.axisBottom(x2));
@@ -239,7 +251,7 @@ Comparison Graphs
 	  .call(d3.axisLeft(y));
 
       y2.domain(d3.extent(tdata, function(d) { return +d.Total; }));
-      svg2.select(".yaxis")
+      svg2.select(".sheep")
 	  .transition()
 	  .duration(2000)
 	  .call(d3.axisLeft(y2));
@@ -256,7 +268,7 @@ Comparison Graphs
 	  .duration(2000)
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return x(+d.Year) })
+		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y(+d.Total) }))
           .attr("stroke", "green")
           .attr("stroke-width", 2);
@@ -273,7 +285,7 @@ Comparison Graphs
 	  .duration(2000)
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return x2(+d.Year) })
+		.x(function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y2(+d.Total) }))
           .attr("stroke", "orange")
           .attr("stroke-width", 2);
@@ -288,7 +300,7 @@ Comparison Graphs
 	  .merge(dots)
 	  .transition()
 	  .duration(2000)
-	  .attr("cx", function(d) { return x(d.Year) })
+	  .attr("cx", function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill", "green");
@@ -303,7 +315,7 @@ Comparison Graphs
 	  .merge(dots2)
 	  .transition()
 	  .duration(2000)
-	  .attr("cx", function(d) { return x2(d.Year) })
+	  .attr("cx", function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y2(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill", "orange");
@@ -321,8 +333,10 @@ Comparison Graphs
       var tdata = create_dict(tdatas, year);
       //console.log(edata);
 
-      x.domain(d3.extent(edata, function(d) { return +d.Year; }));
-      svg.select(".xaxis")
+      //x.domain(d3.extent(edata, function(d) { return +d.Year; }));
+      x.domain([d3.min(edata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
+      		d3.max(edata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
+      svg.select(".chickens")
 	  .transition()
 	  .duration(2000)
 	  .call(d3.axisBottom(x));
@@ -345,7 +359,7 @@ Comparison Graphs
 	  .duration(2000)
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return x(+d.Year) })
+		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y(+d.Total) }))
           .attr("stroke", "green")
           .attr("stroke-width", 2);
@@ -359,20 +373,22 @@ Comparison Graphs
 	  .merge(dots)
 	  .transition()
 	  .duration(2000)
-	  .attr("cx", function(d) { return x(d.Year) })
+	  .attr("cx", function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill", "green");
 
-      x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
-      svg2.select(".xaxis")
+      //x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
+      x2.domain([d3.min(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
+      		 d3.max(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
+      svg2.select(".horses")
 	  .transition()
 	  .duration(2000)
 	  .call(d3.axisBottom(x2));
 
 
       y2.domain(d3.extent(tdata, function(d) { return +d.Total; }));
-      svg2.select(".yaxis")
+      svg2.select(".sheep")
 	  .transition()
 	  .duration(2000)
 	  .call(d3.axisLeft(y2));
@@ -390,7 +406,7 @@ Comparison Graphs
 	  .duration(2000)
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return x2(+d.Year) })
+		.x(function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y2(+d.Total) }))
           .attr("stroke", "orange")
           .attr("stroke-width", 2);
@@ -405,7 +421,7 @@ Comparison Graphs
 	  .merge(dots2)
 	  .transition()
 	  .duration(2000)
-	  .attr("cx", function(d) { return x2(d.Year) })
+	  .attr("cx", function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y2(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill", "orange");
@@ -420,6 +436,108 @@ Comparison Graphs
 
   var scrollbackward = document.getElementById("change2");
   scrollbackward.addEventListener('click', go_back);
+
+
+  //// SAME CHART ////
+
+  var canvas, x, y;
+  var year = 1901;
+
+  var create_dual_dict = function(data1, data2, y) {
+      var dict = [];
+      for(i = 0; i < 10; i++) {
+	  dict[i] = { "Year" : Object.keys(data1)[i], "Carbon" : data1[y],
+		      "Temp" : data2[y] }
+	  y++;
+      }
+      return dict;
+  }
+
+  var render_double_graph = function(e) {
+      var space2 = document.getElementById('space2');
+
+      var edatas = pick(alledata, [year, year+1, year+2, year+3, year+4,
+				   year+5, year+6, year+7, year+8, year+9]);
+      var tdatas = pick(alltdata, [year, year+1, year+2, year+3, year+4, year+5,
+				   year+6, year+7, year+8, year+9]);
+
+      var alldata = create_dual_dict(edatas, tdatas, year);
+      console.log(alldata);
+      
+      var tdata = create_dict(tdatas, year);
+      
+      console.log(tdata);
+
+      var margin = {top: 50, right: 100, bottom: 60, left: 100},
+	  width = 800 - margin.left - margin.right,
+	  height = 600 - margin.top - margin.bottom;
+
+      canvas = d3.select("#space2")
+	  .append("svg")
+	  .attr("width", width + margin.left + margin.right)
+	  .attr("height", height + margin.top + margin.bottom)
+	  .attr("style", "border:4px solid green")
+	  .append("g")
+	  .attr("transform",
+		"translate(" + margin.left + "," + margin.top + ")");
+
+      x = d3.scaleLinear()
+      //.domain([0, d3.max(tdata, function(d) { return +d.Total; })])
+	  .domain(d3.extent(alldata, function(d) { return +d.Temp; }))
+	  .range([ height, 0 ])
+	  .nice();
+      canvas.append("g")
+	  .attr("class", "xaxis")
+	  .attr("transform", "translate(0," + height + ")")
+	  .call(d3.axisBottom(x))
+	  .append("text")
+	  //.attr("transform", "rotate(-90)")
+          .attr("dy", "-4.5em")
+	  .attr("dx", "-4.0em")
+	  .attr("font-size", "10px")
+          .attr("stroke", "black")
+          //.text("Global Average Temperature Anomaly (Celsius)");
+
+      y = d3.scaleLinear()
+	  .domain([0, d3.max(alldata, function(d) { return +d.Carbon; })])
+	  .range([ height, 0 ]);
+      canvas.append("g")
+	  .attr("class", "yaxis")
+	  .call(d3.axisLeft(y))
+	  .append("text")
+	  //.attr("transform", "rotate(-90)")
+          .attr("dy", "-4.5em")
+	  .attr("dx", "-4.0em")
+	  .attr("font-size", "10px")
+          .attr("stroke", "black")
+      //.text("Total carbon emissions (million metric tons of C)");
+
+      canvas.append("path")
+	  .datum(alldata)
+	  .attr("class", "line")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return x(+d.Temp); })
+		.y(function(d) { return y(+d.Carbon); }))
+	  .attr("stroke", "green")
+	  .attr("stroke-width", 2);
+
+      canvas.selectAll(".dot")
+	  .data(alldata)
+	  .enter().append("circle")
+	  .attr("class", "green dot")
+	  .attr("class", "dot") 
+	  .attr("cx", function(d) { return x(+d.Temp); })
+	  .attr("cy", function(d) { return y(+d.Carbon); })
+	  .attr("r", 4)
+	  .attr("fill", "green");
+
+
+  };
+
+  
+  //render_double_graph();  
+  
 
 </script>
 

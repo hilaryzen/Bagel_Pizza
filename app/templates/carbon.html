@@ -5,26 +5,46 @@ CO2 Emissions
 {% endblock %}
 
 {% block body %}
-<br><br><br><br><br>
+<br><br><br>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="../static/d3-tip.js"></script>
 <center>
 
-  <button class="btn btn-success btn-lg" id="change_graphs">Change to Line Graph</button> 
-  
+  <button class="btn btn-success btn-lg" id="change_graphs">Change to Line Graph</button>
   <br><br>
+  <p id="description">Select from a range of years here!</p>
+  
 
+<!--
+  
   <div class="slidecontainer" id="slider">
     <form class="range-field">
       <label for="year_range">Scroll for a range of years: </label>
-      <input type="range" min=1760 max=2010 step=10 id="year_range" value="2010" oninput="selected_year.value = year_range.value">
-      <output name="selected_year" id="selected_year">1760 - 1770</output>
+      <input type="range" min=1901 max=2010 step=10 id="year_range" value="2010" oninput="selected_year.value = year_range.value">
+      <output name="selected_year" id="selected_year">1901</output>
     </form>
   </div>
+
+  -->
   
-  <br>
+  <form>
+    <select class="selectpicker" name="year" id="year">
+      <option value="1901">1901 - 1910</option>
+      <option value="1911">1911 - 1920</option>
+      <option value="1921">1921 - 1930</option>
+      <option value="1931">1931 - 1940</option>
+      <option value="1941">1941 - 1950</option>
+      <option value="1951">1951 - 1960</option>
+      <option value="1961">1961 - 1970</option>
+      <option value="1971">1971 - 1980</option>
+      <option value="1981">1981 - 1990</option>
+      <option value="1991">1991 - 2000</option>
+      <option value="2001">2001 - 2010</option>
+    </select>
+  </form>
+    <br>
   
-  <svg id="plotchart" width="1300" height="650" style="border:4px solid green"></svg>
+  <svg id="plotchart" width="1300" height="600" style="border:4px solid green"></svg>
  
   <br>
 
@@ -44,7 +64,7 @@ CO2 Emissions
   }
 
   .axis {
-      font: 4px sans-serif;
+      font: 10px sans-serif;
   }
 
   .d3-tip {
@@ -85,10 +105,42 @@ CO2 Emissions
 
 <script>
 
-  var cdata = {{ globalEmissions }}
-  console.log(cdata);
+  var cdatas = {{ globalEmissions }}
+  
+  var create_dict = function(data) {
+      var dict = [];
+      for(i = 0; i < 110; i++) {
+	  key = Object.keys(data)[i];
+	  dict[i] = { "Year" : key, "Total" : data[key] }
+      };
+      return dict;
+  }
+
+  var pick = function (obj, props) {
+
+      'use strict';
+
+      // Make sure object and properties are provided
+      if (!obj || !props) return;
+
+      // Create new object
+      var picked = {};
+
+      // Loop through props and push to new object
+      props.forEach(function(prop) {
+	  picked[prop] = obj[prop];
+      });
+
+      // Return new object
+      return picked;
+
+  };
+
+  var cdata = create_dict(cdatas);
+  
 
   ///////////////// LINE GRAPH ///////////////// 
+
 
   var render_line_graph = function(e) {
   
@@ -97,6 +149,10 @@ CO2 Emissions
 	  width = plot.attr("width") - margin,
 	  height = plot.attr("height") - margin
 
+      var p = plot.append("g")
+	  .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+    
       plot.append("text")
 	  .attr("transform", "translate(100,0)")
 	  .attr("x", 400)
@@ -104,49 +160,38 @@ CO2 Emissions
 	  .attr("font-size", "28px")
 	  .text("CO2 Emissions vs. Years")
 
-      var pxScale = d3.scaleTime().range([0, width]),
-	  pyScale = d3.scaleLinear().range([height, 0]);
-      
-      var p = plot.append("g")
-	  .attr("transform", "translate(" + 100 + "," + 100 + ")");
-      
-      d3.csv("../static/co2-global.csv", //function(data){
+      pxScale = d3.scaleTime()
+	  .domain(d3.extent(cdata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([0, width])
+	  .nice();
+      xAxis = p.append("g")
+	  .attr("transform", "translate(0," + height + ")")
+	  .call(d3.axisBottom(pxScale))
+	  .attr("class", "cows")
+	  .append("text")
+	  .attr("font-size", "10px")
+	  .attr("x", 575)
+	  .attr("y", 35)
+          .attr("stroke", "black")
+          .text("Years");
 
-	  function(m) {
-	      return { date : d3.timeParse("%Y")(+m.Year), Total : +m.Total }
-	  },
+      pyScale = d3.scaleLinear()
+	  .domain([0, d3.max(cdata, function(d) { return +d.Total; })])
+	  .range([height, 0])
+	  .nice();
+      yAxis = p.append("g")
+	  .attr("class", "yaxis")
+	  .attr("x", -50)
+	  .call(d3.axisLeft(pyScale))
+	  .append("text")
+	  .attr("transform", "rotate(-90)")
+          .attr("dy", "-4.5em")
+	  .attr("dx", "-4.0em")
+	  .attr("font-size", "10px")
+          .attr("stroke", "black")
+          .text("Total carbon emissions (million metric tons of C)");
 
-	  function(data) {
-	     
-	  //pxScale.domain(data.map(function(d) { return +d.Year; }));
-	  pxScale.domain(d3.extent(data, function(m) { return m.date; })); 
-	  pyScale.domain([0, d3.max(data, function(d) { return +d.Total; })]);  
-	  
-	  xAxis = p.append("g")
-	      //.attr("class", "axis")
-	      .attr("transform", "translate(0, 450)")
-	      //.tickformat(d3.timeFormat("%Y"))
-	      .call(d3.axisBottom(pxScale))
-	      .selectAll("text")	
-              .style("text-anchor", "end")
-              .attr("dx", "-.8em")
-              .attr("dy", ".19em")
-              .attr("transform", "rotate(-65)")
-	      .append("text");
-
-	  // Add the Y Axis
-	  yAxis = p.append("g")
-              .call(d3.axisLeft(pyScale))
-	      .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("dy", "-4.5em")
-	      .attr("dx", "-4.0em")
-	      .attr("font-size", "14px")
-              .attr("stroke", "black")
-              .text("Total carbon emissions (million metric tons of C)")
-
-	  
-	  var clip = plot.append("defs").append("svg:clipPath")
+      var clip = p.append("defs").append("svg:clipPath")
               .attr("id", "clip")
               .append("svg:rect")
               .attr("width", width )
@@ -154,88 +199,104 @@ CO2 Emissions
               .attr("x", 0)
               .attr("y", 0);
 	  
-	  // Add brushing
-	  var brush = d3.brushX()                   // Add the brush feature using the d3.brush function
-              .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-              .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+      // Add brushing
+      var brush = d3.brushX()                   // Add the brush feature using the d3.brush function
+          .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+          .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
 
-	  // Create the line variable: where both the line and the brush take place
-	  var line = p.append("g")
-	      .attr("clip-path", "url(#clip)")
+      // Create the line variable: where both the line and the brush take place
+      var line = p.append("g")
+	  .attr("clip-path", "url(#clip)")
 
-	  line.append("path")
-	      .datum(data)
-	      .attr("class", "line")
-	      .attr("fill", "none")
-	      .attr("stroke", "green")
-	      .attr("stroke-width", 1.8)
-	      .attr("d", d3.line()
-		    .x(function(m) { return pxScale(m.date) })
-		    .y(function(d) { return pyScale(+d.Total) }));
+      line.append("path")
+	  .datum(cdata)
+	  .attr("class", "line")
+	  .attr("fill", "none")
+	  .attr("stroke", "green")
+	  .attr("stroke-width", 1.8)
+	  .attr("d", d3.line()
+		.x(function(m) { return pxScale(d3.timeParse("%Y")(m.Year)) })
+		.y(function(d) { return pyScale(+d.Total) }));
 
-	  line
-	      .append("g")
-              .attr("class", "brush")
-              .call(brush);
+      line
+	  .append("g")
+          .attr("class", "brush")
+          .call(brush);
+      
+      var idleTimeout
+      function idled() { idleTimeout = null; }
 
-	  //console.log(pxScale.invert(extent[0]));
-	  
-	  var idleTimeout
-	      function idled() { idleTimeout = null; }
+      function updateChart() {
 
-	      //TO DO : make it so highlighting regions and zooming in will change axes
-
-	  function updateChart() {
-
-	      // What are the selected boundaries?
-	      extent = d3.event.selection
-	      //console.log(extent);
-	      
-	      
-	      // If no selection, back to initial coordinate. Otherwise, update X axis domain
-	      if(!extent){
-		  console.log("hi");
-		  if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
-		  pxScale.domain([4,8])
-	      }else{
-		  console.log(pxScale.invert(extent[0]));
-		  pxScale.domain([ pxScale.invert(extent[0]), pxScale.invert(extent[1]) ])
-		  line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
-	      }
-
-	      // Update axis and line position
-	      xAxis.transition().duration(1000).call(d3.axisBottom(pxScale))
-	      line
-		  .select('.line')
-		  .transition()
-		  .duration(1000)
-		  .attr("d", d3.line()
-			.x(function(m) { return pxScale(m.date) })
-			.y(function(d) { return pyScale(+d.Total) })
-		       )
+	  // What are the selected boundaries?
+	  extent = d3.event.selection
+	  // If no selection, back to initial coordinate. Otherwise, update X axis domain
+	  if(!extent) {
+	      if (!idleTimeout) return idleTimeout = setTimeout(idled, 100); // This allows to wait a little bit
+	      pxScale.domain([4,8])
+	  }
+	  else {
+	      console.log(pxScale.invert(extent[0]));
+	      console.log(pxScale.invert(extent[1]));
+	      pxScale
+		  .domain([ pxScale.invert(extent[0]), pxScale.invert(extent[1]) ])
+	      line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
 	  }
 
-	  // If user double click, reinitialize the chart
-	  plot.on("dblclick",function(){
-	      pxScale.domain(d3.extent(data, function(m) { return m.date; }))
-	      xAxis.transition().call(d3.axisBottom(pxScale))
-	      line
-		  .select('.line')
-		  .transition()
-		  .attr("d", d3.line()
-			.x(function(m) { return pxScale(m.date) })
-			.y(function(d) { return pyScale(+d.Total) })
-		       )
-	  });
+	  // Update axis and line position
+	  plot.select('.cows')
+	      .transition()
+	      .duration(1000)
+	      .call(d3.axisBottom(pxScale));
+	  line
+	      .select('.line')
+	      .transition()
+	      .duration(1000)
+	      .attr("d", d3.line()
+		    .x(function(m) { return pxScale(d3.timeParse("%Y")(m.Year)) })
+		    .y(function(d) { return pyScale(+d.Total) })
+		   )
+      }
 
+      // If user double click, reinitialize the chart
+      plot.on("dblclick",function(){
+	  pxScale.domain(d3.extent(cdata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  plot.select('.cows')
+	      .transition()
+	      .duration(1000)
+	      .call(d3.axisBottom(pxScale));
+	  line
+	      .select('.line')
+	      .transition()
+	      .attr("d", d3.line()
+		    .x(function(d) { return pxScale(d3.timeParse("%Y")(d.Year)) })
+		    .y(function(d) { return pyScale(+d.Total) })
+		   )
       });
-
   };
+
+
+  var create_dict_range = function(data, y) {
+      var dict = [];
+      for(i = 0; i < Object.keys(data).length; i++) {
+	  dict[i] = { "Year" : Object.keys(data)[i], "Total" : data[y] }
+	  y++;;
+      }
+      return dict;
+  }
+
+  var year = 1901;
 
   
   ///////////////// BARCHART /////////////////
 
   var render_bar_chart = function(e) {
+
+      var rcdatas = pick(cdatas,  [year, year+1, year+2, year+3, year+4,
+				 year+5, year+6, year+7, year+8, year+9]);
+
+      var rcdata = create_dict_range(rcdatas, year);
+      console.log(rcdata);
       
       var svg = d3.select("#plotchart"),
 	  margin = 200,
@@ -248,14 +309,9 @@ CO2 Emissions
 	  .attr("y", 50)
 	  .attr("font-size", "28px")
 	  .text("CO2 Emissions vs. Years")
+	  .attr("class", "x")
+	  .attr("class", "y")
 
-      var xScale = d3.scaleBand().range([0, width]).padding(0.2),
-	  yScale = d3.scaleLinear().range([height, 0]);
-
-      var x_axis = d3.axisBottom(xScale),
-	  y_axis = d3.axisLeft(yScale);
-      
-      
       var g = svg.append("g")
 	  .attr("transform", "translate(" + 100 + "," + 100 + ")");
 
@@ -268,76 +324,135 @@ CO2 Emissions
 
       svg.call(tip);
 
-      d3.csv("../static/co2-global.csv", function(data) {
-	  
-	  xScale.domain(data.map(function(d) { return +d.Year; }));
-	  yScale.domain([0, d3.max(data, function(d) { return +d.Total; })]);
+      xScale = d3.scaleBand()
+	  .domain(rcdata.map(function(d) { return d.Year; }))
+	  .range([0, width])
+	  .padding(0.2);
+      g.append("g")
+	  .attr("class", "x")
+	  .attr("transform", "translate(0," + height + ")")
+	  .call(d3.axisBottom(xScale))
+	  .append("text")
+	  .attr("font-size", "10px")
+	  .attr("x", 575)
+	  .attr("y", 35)
+          .attr("stroke", "black")
+          .text("Years");
 
-	  g.append("g")
-	      .attr("class", "axis")
-	      .attr("transform", "translate(0," + height + ")")
-	      .call(d3.axisBottom(xScale))
-	      .selectAll("text")
-	      .style("text-anchor", "end")
-	      .attr("dx", "-2em")
-              .attr("dy", ".1em")
-	      .attr("y", -0.01)
-	      .attr("transform", "rotate(-90)")
-	      .append("text");
+      yScale = d3.scaleLinear()
+	  .domain([0, d3.max(rcdata, function(d) { return +d.Total; })])
+	  .range([height, 0])
+	  .nice();
+      g.append("g")
+	  .attr("class", "pigs")
+	  .attr("x", -50)
+	  .call(d3.axisLeft(yScale))
+	  .append("text")
+	  .attr("transform", "rotate(-90)")
+          .attr("dy", "-4.5em")
+	  .attr("dx", "-4.0em")
+	  .attr("font-size", "10px")
+          .attr("stroke", "black")
+          .text("Total carbon emissions (million metric tons of C)");
 
 
-	  // supposed to be the label for x-axis but doesn't work....
-	  g.append("g")
-              .attr("transform", "translate(0," + height + ")")
-              .call(d3.axisBottom(xScale))
-          //.attr("y", height - 250)
-          //.attr("x", width - 100)
-              .attr("text-anchor", "end")
-              .attr("stroke", "black")
-              .text("Year");
+      x_axis = d3.axisBottom().scale(xScale);
+      y_axis = d3.axisLeft().scale(yScale);
 
-	  g.append("g")
-              .call(d3.axisLeft(yScale)) //.tickFormat(function(d){
-	  //return "$" + d;
-	  //})
-	  //.ticks(10)
-              .append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("dy", "-5.1em")
-              .attr("text-anchor", "front")
-              .attr("stroke", "black")
-	  //.attr("font-size", "24px")
-              .text("Total carbon emissions from fossil fuel consumption and cement production (million metric tons of C)");
-
-	  g.selectAll(".bar")
-              .data(data)
-              .enter().append("rect")
-              .attr("class", "bar")
-              .attr("x", function(d) { return xScale(d.Year); })
-              .attr("y", function(d) { return yScale(d.Total); })
-              .attr("width", xScale.bandwidth())
-              .attr("height", function(d) { return height - yScale(d.Total); })
-	      .on('mouseover', tip.show)
-	      .on('mouseout', tip.hide);
-	  
-      });
+      g.selectAll(".bar")
+          .data(rcdata)
+          .enter().append("rect")
+          .attr("class", "bar")
+          .attr("x", function(d) { return xScale(d.Year); })
+          .attr("y", function(d) { return yScale(d.Total); })
+          .attr("width", xScale.bandwidth())
+          .attr("height", function(d) { return height - yScale(d.Total); })
+	  .on('mouseover', tip.show)
+	  .on('mouseout', tip.hide);
 
   };
 
+  
+  // function for drawing each separate data range
+  var draw = function(year) {
+
+      if (year + 10 <= 2010) year += 10;
+      console.log(year);
+      
+      var csv_datas = pick(cdatas, [year, parseInt(year)+1, parseInt(year)+2,
+				    parseInt(year)+3, parseInt(year)+4,
+				    parseInt(year)+5, parseInt(year)+6,
+				    parseInt(year)+7, parseInt(year)+8,
+				    parseInt(year)+9]);;
+
+      var csv_data = create_dict_range(csv_datas, year);
+      console.log(csv_data);
+
+      var t = d3.transition()
+	  .duration(2000);
+
+      var years = csv_data.map(function(d) { return +d.Year; });
+      xScale.domain(years); //setting x scale to the chosen domain
+
+      //setting y scale to range of chosen domain
+      yScale.domain([0, d3.max(csv_data, function(d) { return +d.Total; })]);
+
+      
+      var svg = d3.select("#plotchart");
+      
+      var bars = svg.selectAll('.bar')
+	  .data(csv_data) //setting the data to the chosen range of years
+
+      bars
+	  .exit()
+	  .remove(); //i'm assuming some kind of transition
+
+      var new_bars = bars
+	  .enter()
+	  .append('rect')
+	  .attr('class', 'bar')
+	  .attr('x', function(d) { return xScale(+d.Year); })
+	  .attr('width', xScale.bandwidth())
+	  .attr('y', function(d) { return yScale(d.Total); })
+	  .attr('height', 0)
+
+      new_bars.merge(bars)
+	  .transition(t)
+	  .attr('y', function(d) {
+	      return yScale(+d.Total);
+	  })
+	  .attr('height', function(d) {
+	      return 400 - yScale(+d.Total);
+	  })
+
+
+      svg.select('.x')
+	  .transition(t)
+	  .call(x_axis);
+
+      svg.select('.pigs')
+	  .transition(t)
+	  .call(y_axis);
+  }
+
+  /// switchy switcharoo stuff ///
+  
   var num = 0; // 0 is bar chart, 1 is line graph
 
   var hide_bar_chart = function(e) {
       //d3.select("#barchart").remove();
       d3.select("#plotchart").selectAll("*").remove();
       document.getElementById("change_graphs").innerHTML = 'Change to Bar Chart';
-      document.getElementById("slider").style.display = "none";
+      document.getElementById("year").style.display = "none";
+      document.getElementById("description").innerHTML = 'Highlight an area to zoom in, double click to reset!';
       num = 1;
   };
 
   var hide_line_graph = function(e) {
       d3.select("#plotchart").selectAll("*").remove();
       document.getElementById("change_graphs").innerHTML = 'Change to Line Graph';
-      document.getElementById("slider").style.display = "block";
+      document.getElementById("year").style.display = "block";
+      document.getElementById("description").innerHTML = 'Select from a range of years here!';
       num = 0;
   };
 
@@ -356,123 +471,20 @@ CO2 Emissions
   
   var changebutton = document.getElementById("change_graphs");
   changebutton.addEventListener('click', switch_graphs);
-      
 
   
-
-  // TODO- once function is written, create seperate array things of different time periods, add slider
-
-  var year = 1901;
-
-//function here for parsing through the array of csv values generated by the csv reader function and putting it into usable ranges
-  
-  // function for drawing each separate data range
-  function draw(year) {
-      
-      var csv_data = cdata[year];
-
-      var t = d3.transition()
-	  .duration(2000);
-
-      var years = csv_data.map(function(d) { return +d.Year; });
-      xScale.domain(years); //setting x scale to the chosen domain
-
-      var max_emissions = d3.max(csv_data, function(d) { return +d.Total; });
-      yScale.domain([0, max_emissions]); //setting y scale to range of chosen domain
-
-      var bars = svg.selectAll('.bar')
-	  .data(csv_data) //setting the data to the chosen range of years
-
-      bars
-	  .exit()
-	  .remove(); //i'm assuming some kind of transition
-
-      var new_bars = bars
-	  .enter()
-	  .append('rect')
-	  .attr('class', 'bar')
-	  .attr('x', function(d) { return xScale(+d.Year); })
-	  .attr('width', xScale.bandwidth())
-	  .attr('y', height)
-	  .attr('height', 0)
-
-      new_bars.merge(bars)
-	  .transition(t)
-	  .attr('y', function(d) {
-	      return yScale(+d.Total);
-	  })
-	  .attr('height', function(d) {
-	      return height - yScale(+d.Total);
-	  })
-
-      svg.select('.x.axis')
-	  .call(x_axis);
-
-      svg.select('.y.axis')
-	  .transition(t)
-	  .call(y_axis);
-  }
-
-      
-  // the queue stuff
 
   var slider = d3.select('#year_range');
   slider.on('change', function() {
-      draw(this.value);
+      draw(year);
   });
- 
-      
-      
-      // array of csv data
-      //const datas = d3.csvParse(await FileAttachment("../static/co2-emissions.csv").text(), d3.autoType);
-      //console.log(datas);
-     /* data = {
-	  const text = await FileAttachment("../static/co2-emissions.csv").text();
-	  const parseData = d3.utcParse("%Y");
-	  return d3.csvParse(text, ({date, temperature}) => ({
-	      date: parseDate(Year),
-	      temperature: +Total
-	  }));
-      }
 
-      var x = d3.scaleLinear()
-	  .domain([0, d3.max(data, d => d.Year)])
-	  .range([margin.left, width - margin.right])
+  var select = d3.select('#year');
+  select.on('change', function() {
+      console.log(this.value);
+      draw(this.value);
+  })
 
-      var y = d3.scaleBand()
-	  .domain(data.map(d => d.Total))
-	  .range([margin.top, height - margin.bottom])
-	  .padding(0.1)
-	  .round(true)
-      
-      var help = data.map(d => d.Total)
-      import {chart as temperatureHistogram} with {temperatures as data, height} from "@d3/histogram" */
-      
-
-      /*d3.csv("../static/co2-emissions.csv", function(data) {
-	  xScale.domain(data.map(function(d) { return d.Year; }));
-	  yScale.domain([0, d3.max(data, function(d) {return d.Total;})]);
-
-	  g.append("g")
-              .attr("transform", "translate(0," + 100 + ")")
-              .call(d3.axisBottom(xScale));
-
-          g.append("g")
-              .call(d3.axisLeft(yScale).tickFormat(function(d){
-                  return d;
-              }).ticks(10));
-          
-          g.selectAll(".bar")
-              .data(data)
-              .enter().append("rect")
-              .attr("class", "bar")
-              .attr("x", function(d) { return xScale(d.Year); })
-              .attr("y", function(d) { return yScale(d.Total); })
-              .attr("width", xScale.bandwidth())
-              .attr("height", function(d) { return 100 - yScale(d.degrees); });
-	      }); */
-
-  
   
 
 </script>
