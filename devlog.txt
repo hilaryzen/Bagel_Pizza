@@ -38,3 +38,7 @@ aliceN -- 2020-05-08 23:58
 - Added some design changes to make the site look nicer
 - A merged graph exists, but it looks weird. Gonna look into other types of graphs for this one.
 - If time, make the green scale for the carbon bar chart longer so there are more colors.
+
+leiaP -- 2020-05-09 15:29
+- Added the CSV reader function to create dictionary of countries and their CO2 emissions
+- Planning on editing design doc to update: data.py helper file is no longer necessary
