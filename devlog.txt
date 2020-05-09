@@ -33,3 +33,8 @@ aliceN -- 2020-05-08 00:10
 - Added small instructions for the carbon graphs, might add some more detailed ones
 - Still need to work on the merged graphs, it's kinda strange figuring out the axes
 - Will start looking into pie charts, as an extra thing for the carbon graphs
+
+aliceN -- 2020-05-08 23:58
+- Added some design changes to make the site look nicer
+- A merged graph exists, but it looks weird. Gonna look into other types of graphs for this one.
+- If time, make the green scale for the carbon bar chart longer so there are more colors.
