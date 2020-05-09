@@ -65,7 +65,7 @@ def emissions():
 
 @app.route("/compare")
 def compare():
-    return render_template("alldata.html", globalEmissions = globalco2, globalTemp = globalTemp)
+    return render_template("alldata.html", globalEmissions = globalco2, globalTemp = globalTemp, usTemp = usTempValue)
 
 if __name__ == "__main__":
     app.debug = True
