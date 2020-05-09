@@ -18,6 +18,16 @@ Comparison Graphs
   <p id="space2"></p>
 </center>
 
+<style>
+
+  .dot:hover {
+      fill: orangered
+  }
+
+</style>
+
+  
+
 <script>
 
   var svg, x, y;
@@ -116,13 +126,15 @@ Comparison Graphs
 	  .domain([0, d3.max(edata, function(d) { return +d.Total; })])
 	  .range([ height, 0 ]);
       svg.append("g")
-	  .attr("class", "yaxis")
+	  .attr("class", "bees")
 	  .call(d3.axisLeft(y))
 	  .append("text")
 	  .attr("transform", "rotate(-90)")
           .attr("dy", "-4.5em")
 	  .attr("dx", "-4.0em")
-	  .attr("font-size", "10px")
+	  .attr("font-size", "12px")
+	  .attr("y", 10)
+	  .attr("x", 40)
           .attr("stroke", "black")
           .text("Total carbon emissions (million metric tons of C)");
 	  
@@ -183,7 +195,8 @@ Comparison Graphs
 	  .attr("transform", "rotate(-90)")
           .attr("dy", "-4.5em")
 	  .attr("dx", "-4.0em")
-	  .attr("font-size", "10px")
+	  .attr("font-size", "12px")
+	  .attr("x", 20)
           .attr("stroke", "black")
           .text("Global Average Temperature Anomaly (Celsius)");
 
@@ -245,7 +258,7 @@ Comparison Graphs
 	  .call(d3.axisBottom(x2));
 
       y.domain([0, d3.max(edata, function(d) { return +d.Total; })]);
-      svg.select(".yaxis")
+      svg.select(".bees")
 	  .transition()
 	  .duration(2000)
 	  .call(d3.axisLeft(y));
@@ -342,7 +355,7 @@ Comparison Graphs
 	  .call(d3.axisBottom(x));
 
       y.domain([0, d3.max(edata, function(d) { return +d.Total; })]);
-      svg.select(".yaxis")
+      svg.select(".bees")
 	  .transition()
 	  .duration(2000)
 	  .call(d3.axisLeft(y));
@@ -453,8 +466,8 @@ Comparison Graphs
       return dict;
   }
 
-  var render_double_graph = function(e) {
-      var space2 = document.getElementById('space2');
+  var render_double_graph = function() {
+      //var space2 = document.getElementById('space2');
 
       var edatas = pick(alledata, [year, year+1, year+2, year+3, year+4,
 				   year+5, year+6, year+7, year+8, year+9]);
@@ -466,7 +479,7 @@ Comparison Graphs
       
       var tdata = create_dict(tdatas, year);
       
-      console.log(tdata);
+      //console.log(tdata);
 
       var margin = {top: 50, right: 100, bottom: 60, left: 100},
 	  width = 800 - margin.left - margin.right,
@@ -481,15 +494,15 @@ Comparison Graphs
 	  .attr("transform",
 		"translate(" + margin.left + "," + margin.top + ")");
 
-      x = d3.scaleLinear()
+      xm = d3.scaleLinear()
       //.domain([0, d3.max(tdata, function(d) { return +d.Total; })])
 	  .domain(d3.extent(alldata, function(d) { return +d.Temp; }))
 	  .range([ height, 0 ])
 	  .nice();
       canvas.append("g")
-	  .attr("class", "xaxis")
+	  //.attr("class", "xaxis")
 	  .attr("transform", "translate(0," + height + ")")
-	  .call(d3.axisBottom(x))
+	  .call(d3.axisBottom(xm))
 	  .append("text")
 	  //.attr("transform", "rotate(-90)")
           .attr("dy", "-4.5em")
@@ -498,12 +511,12 @@ Comparison Graphs
           .attr("stroke", "black")
           //.text("Global Average Temperature Anomaly (Celsius)");
 
-      y = d3.scaleLinear()
+      ym = d3.scaleLinear()
 	  .domain([0, d3.max(alldata, function(d) { return +d.Carbon; })])
 	  .range([ height, 0 ]);
       canvas.append("g")
-	  .attr("class", "yaxis")
-	  .call(d3.axisLeft(y))
+	  //.attr("class", "yaxis")
+	  .call(d3.axisLeft(ym))
 	  .append("text")
 	  //.attr("transform", "rotate(-90)")
           .attr("dy", "-4.5em")
@@ -514,21 +527,20 @@ Comparison Graphs
 
       canvas.append("path")
 	  .datum(alldata)
-	  .attr("class", "line")
+	  .attr("class", "merged line")
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return x(+d.Temp); })
-		.y(function(d) { return y(+d.Carbon); }))
+		.x(function(d) { return xm(+d.Temp); })
+		.y(function(d) { return ym(+d.Carbon); }))
 	  .attr("stroke", "green")
 	  .attr("stroke-width", 2);
 
       canvas.selectAll(".dot")
 	  .data(alldata)
 	  .enter().append("circle")
-	  .attr("class", "green dot")
-	  .attr("class", "dot") 
-	  .attr("cx", function(d) { return x(+d.Temp); })
-	  .attr("cy", function(d) { return y(+d.Carbon); })
+	  .attr("class", "merged dot")
+	  .attr("cx", function(d) { return xm(+d.Temp); })
+	  .attr("cy", function(d) { return ym(+d.Carbon); })
 	  .attr("r", 4)
 	  .attr("fill", "green");
 
@@ -536,7 +548,7 @@ Comparison Graphs
   };
 
   
-  //render_double_graph();  
+  render_double_graph();  
   
 
 </script>
