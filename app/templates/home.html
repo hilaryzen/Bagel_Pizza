@@ -5,19 +5,22 @@ Homepage
 {% endblock %}
 
 {% block body %}
+
+<style>
+  p {
+      max-width: 1000px;
+      font-size: 20px;
+  }
+</style>
+
+
 <br><br><br>
 <div class="p-3 container text-center bg-white">
   <center>
     <img src="../static/img/header.png" width="1000" height="200"></img>
   </center>
-  <!--
-      <h1 class="text-success">Welcome to Green Graphs!</h1>
-  <p class="text-success">by Hilary Zen, Pratham Rawat, Leia Park & Alice Ni</p>
-  -->
 </div>
-
 <br>
-
 <div class="container text-center">
   <form method="GET" action="/temperature">
     <button class="btn btn-success btn-lg btn-block">Global Temperature Anomaly</button>
@@ -33,24 +36,30 @@ Homepage
     <button class="btn btn-primary btn-lg btn-block">Compare Data</button>
   </form>
   
-
 </div>
+<center>
+  <br><br>
+  <button class="btn btn-success btn-lg" id="facts">Click Me for Enlightenment!</button>
+  <br><br>
+  <p id="factspace" style="color:green"></p>
+</center>
 
-<br><br>
+<br><br><br><br>
 
-<div id="observablehq-63717898"></div>
+<script>
 
+  // Information taken from https://www.conserve-energy-future.com/various-climate-change-facts-php.php
 
-<!--
+  var facts = [ "The global temperature on an average has increased by 0.6 to 1 degree Celsius till the 20th century.", "The United States constitutes 5% of the world population and contributes to 22% of world’s carbon emission.", "Around 15% of the carbon released in the environment is due to deforestation and change in use of land.", "The golden Toad is the first species to go extinct due to climate change :(", "Vehicles like cars and truck contribute to 20% of carbon emissions in the United States.", "Air conditions and heating elements consume 50% of electricity in America.", "Hurricanes, droughts and coral deaths are few of the natural disasters  caused due to climate change.", "The hottest years have been experienced since 1990 till 1997. The warmest years have been from 2005-2010.", "The number of climate change related incidents have increase four fold between 1980 and 2010.", "Land use change and deforestation contributes to 15% of carbon emission every year.", "Carbon dioxide constitutes only 3.6 % of total greenhouse gases out of which 0.12% is attributed to human activities.", "Carbon dioxide is not the only contributing gas towards climate change. Other gases like methane and nitrous oxide are far more dangerous than carbon dioxide alone.", "According to World Food Program (WPF.org), by 2015, the number of people affected by climate change disasters could reach 375 million per year.", "Above 600000 deaths occur worldwide every year due to climate change. 95% of these deaths take place in developing countries.", "Climate change can have serious health impacts such as heat stress, extreme cold which can cause major deaths due to heart diseases.", "In 2003, around 70,000 deaths have occurred in Europe alone due to diseases caused by rising temperatures.", "Climate change is rapidly causing coastal flooding and displacement of people. Floods further cause major damages by injuring and killing people. They can even cause deadly diseases by spreading infection and vector borne diseases.", " Steps to reduce greenhouse gases can help save the negative health impacts. Promoting safe public transportation and active activities like walking or use public transport can help reduce carbon emissions. This can also help to cut down traffic, air pollution and thereby reducing cardiovascular diseases.", "Over the next 20 years, global warming is expected to increase by 0.2 degree per decade.", "According to a recent report by Oxfam, climate change could push food prices by 50-60 percent more by 2030." ]
 
-<script type="module">
-  import {Runtime, Inspector} from "https://cdn.jsdelivr.net/npm/@observablehq/runtime@4/dist/runtime.js";
-  import define from "https://api.observablehq.com/@d3/versor-dragging.js?v=3";
-  const inspect = Inspector.into("#observablehq-63717898");
-  (new Runtime).module(define, name => (name === "chart") && inspect());
+  var fact_button = document.getElementById("facts");
+  fact_button.addEventListener('click', function() {
+      rand_num = Math.floor(Math.random() * 20);
+      document.getElementById("factspace").innerHTML = facts[rand_num];
+  });
+
 </script>
 
--->
 
 
 
