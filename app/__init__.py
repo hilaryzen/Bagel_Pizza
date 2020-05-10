@@ -53,6 +53,50 @@ def importGlobalCO2(filename):
                 globalco2[year] = float(row[1])
                 year += 1
 
+countryco2 = {} # the dictionary
+oneCountry = {}
+# gives dictionary of country's co2 emissions by year
+# ex. {"UNITED STATES" : {1901: ####, ...}}
+def importCO2(country):
+    with open("static/co2-emissions.csv", 'r') as file:
+        data = csv.reader(file)
+        for row in data:
+            if row[1] == country and int(row[0]) >= 1901 and int(row[0]) <= 2000:
+                oneCountry[int(row[0])] = float(row[2])
+    countryco2[country] = oneCountry
+    
+
+importCO2("UNITED KINGDOM")
+importCO2("CANADA")
+importCO2("GERMANY")
+importCO2("UNITED STATES")
+importCO2("POLAND")
+importCO2("SPAIN")
+importCO2("NORWAY")
+importCO2("INDIA")
+importCO2("PORTUGAL")
+importCO2("VIET NAM")
+importCO2("HUNGARY")
+importCO2("GREECE")
+importCO2("SWEDEN")
+importCO2("PERU")
+
+yearlyCountryCO2 = {} # the dictionary
+oneYear = {}
+keys = ["UNITED KINGDOM", "CANADA", "GERMANY", "UNITED STATES", "POLAND", "SPAIN", "NORWAY", "INDIA", "PORTUGAL", "VIET NAM", "HUNGARY", "GREECE", "SWEDEN", "PERU"]
+# gives dictionary of year's co2 emissions by country
+# ex. {1901 : {"UNITED STATES" : #####, ...}
+def importYearCO2(filename):
+    with open(filename, 'r') as file:
+        data = csv.reader(file)
+        year = "1901"
+        while int(year) <= 2000:
+            for row in data:
+               if year == row[0] and row[1] in keys:
+                    oneYear[row[1]] = float(row[2])
+            yearlyCountryCO2[int(year)] = oneYear
+            year = str(int(year) + 1)
+
 @app.route("/")
 def hello_world():
     return render_template("home.html")
@@ -76,4 +120,5 @@ if __name__ == "__main__":
     #print(usTempValue)
     #print(usTempAnomaly)
     importGlobalTemp('static/global_temp.json')
+    importYearCO2('static/co2-emissions.csv')
     app.run()
