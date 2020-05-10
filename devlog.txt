@@ -42,3 +42,9 @@ aliceN -- 2020-05-08 23:58
 leiaP -- 2020-05-09 15:29
 - Added the CSV reader function to create dictionary of countries and their CO2 emissions
 - Planning on editing design doc to update: data.py helper file is no longer necessary
+
+aliceN -- 2020-05-10 01:03
+- Finalized the comparsion graphs, added another one for U.S vs Global temperature anomaly
+- Added some design, like tooltips for the dots and some description
+- Tomorrow (or today oops) will look into another possible type of graph to add, some extras
+- Will also finalize design of the site, like remove search bar, etc. 
