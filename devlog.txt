@@ -48,3 +48,12 @@ aliceN -- 2020-05-10 01:03
 - Added some design, like tooltips for the dots and some description
 - Tomorrow (or today oops) will look into another possible type of graph to add, some extras
 - Will also finalize design of the site, like remove search bar, etc. 
+
+leiaP -- 2020-05-10 17:22
+- Added another CSV reader function to create dictionary of countries based on year
+- Refresh:
+  - First country CSV reader makes dict of countries with co2 emission of each year
+  - ex. dict = {"UNITED STATES" : {1901: ###, 1902: ###}, "UNITED KINGDOM": {1901:###, ....}}
+  - Second country csv reader makes dict of years with co2 emission of each country
+  - ex. dict = {1901: {"PERU" : ####, "GREECE": ####], 1902: {"PERU": ###, ...}}
+- Added in carbon.html code to create pie chart for each country -- still in progress
