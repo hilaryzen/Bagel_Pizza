@@ -5,36 +5,118 @@ Comparison Graphs
 {% endblock %}
 
 {% block body %}
-<br><br><br><br>
+<br><br><br>
 <script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="../static/d3-tip.js"></script>
 
 <center>
+  <p> Click to toggle between decades! Hover over each dot to see specific data! </p>
   <button class="btn btn-success" id="change">Go Forward 10 Years</button>
   <button class="btn btn-success" id="change2">Go Back 10 Years</button>
   <br><br>
+
   <p id="space"></p>
   <br><br>
-  WORK IN PROGRESS WORK IN PROGRESS WORK IN PROGRESS
-  <p id="space2"></p>
-</center>
 
+
+  <div id="column1">
+    <p id="space2"></p>
+  </div>
+  <br><br><br><br><br><br><br><br><br>
+  
+  <div id="column2">
+    <p> Click to toggle for U.S. vs world temp anomaly! </p>
+    <button class="btn btn-success" id="change3">Go Forward 10 Years</button>
+    <br><br>
+    <button class="btn btn-success" id="change4">Go Back 10 Years</button>
+  </div>
+  
+
+</center>
 <style>
 
   .dot:hover {
       fill: orangered
   }
 
+  .gdot:hover {
+      fill: orange
+  }
+
+  .usdot:hover {
+      fill: pink
+  }
+
+  #boxes {
+      content: "";
+      display: table;
+      clear: both;
+  }
+
+  div {
+      float: left;
+      height: 10px;
+      width: 40%;
+      padding: 0 10px;
+  }
+
+  #column1 {
+      float: left;
+      width: 70%;
+  }
+
+  #column2 {
+      float: right;
+      width: 40%;
+  }
+
+  .d3-tip {
+      line-height: 0;
+      font-weight: bold;
+      width: 115px;
+      height: 15px;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 2px;
+      text-aligh: center;
+  }
+
+  /* Creates a small triangle extender for the tooltip */
+  .d3-tip:after {
+      box-sizing: border-box;
+      display: inline;
+      font-size: 10px;
+      width: 100%;
+      line-height: 1;
+      color: rgba(0, 0, 0, 0.8);
+      content: "\25BC";
+      position: absolute;
+      text-align: center;
+  }
+
+  /* Style northward tooltips differently */
+  .d3-tip.n:after {
+      margin: -1px 0 0 0;
+      top: 100%;
+      left: 0;
+  }
+
 </style>
 
-  
-
 <script>
+
+  //style = "position:absolute; left:70px; top:600px;"
 
   var svg, x, y;
   var year = 1901;
   var alledata = {{ globalEmissions }}
   var alltdata = {{ globalTemp }}
+  var ustdata = {{ usTemp }}
+  var usadata = {{ usAnomaly }}
 
+  console.log(usadata);
+  
   var pick = function (obj, props) {
 
       'use strict';
@@ -58,6 +140,7 @@ Comparison Graphs
   var create_dict = function(data, y) {
       var dict = [];
       for(i = 0; i < Object.keys(data).length; i++) {
+	  //console.log(data[y]);
 	  dict[i] = { "Year" : Object.keys(data)[i], "Total" : data[y] }
 	  y++;;
       }
@@ -90,7 +173,7 @@ Comparison Graphs
       //console.log(d3.extent(edata, function(d) { return +d.Year; }));
       //console.log(edata[0]);
 
-      console.log(tdata);
+      //console.log(tdata);
 
       var margin = {top: 50, right: 100, bottom: 60, left: 100},
 	  width = 600 - margin.left - margin.right,
@@ -104,6 +187,15 @@ Comparison Graphs
 	  .append("g")
 	  .attr("transform",
 		"translate(" + margin.left + "," + margin.top + ")");
+
+      svg.append("text")
+	  .attr("transform", "translate(100,0)")
+	  .attr("x", 10)
+	  .attr("y", -20)
+	  .attr("font-size", "16px")
+	  .text("CO2 Emissions vs. Years")
+	  .attr("class", "x")
+	  .attr("class", "y")
 
       x = d3.scaleTime()
       //.domain(d3.extent(edata, function(d) { return d.Year; }))
@@ -137,7 +229,15 @@ Comparison Graphs
 	  .attr("x", 40)
           .attr("stroke", "black")
           .text("Total carbon emissions (million metric tons of C)");
-	  
+
+       var tip = d3.tip()
+	  .attr('class', 'd3-tip')
+	   .offset([-10, 0])
+	  .html(function(d) {
+	      return "<strong>" + +d.Year + ": </strong> <span style='color:#bfffbb'>" + d.Total + "</span>";
+	  });
+
+      svg.call(tip);
 
       svg.append("path")
 	  .datum(edata)
@@ -146,10 +246,10 @@ Comparison Graphs
 	  .attr("d", d3.line()
 		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y(+d.Total) }))
-	  .attr("stroke", "green")
+	  .attr("stroke", "url(#line-gradient)")
 	  .attr("stroke-width", 2);
       
-      svg.selectAll(".green.dot")
+      svg.selectAll(".dot")
 	  .data(edata)
 	  .enter().append("circle")
 	  .attr("class", "green dot")
@@ -157,7 +257,9 @@ Comparison Graphs
 	  .attr("cx", function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y(+d.Total) })
 	  .attr("r", 4)
-	  .attr("fill", "green");
+	  .attr("fill", "url(#line-gradient)")
+	  .on('mouseover', tip.show)
+	  .on('mouseout', tip.hide);
 
       /// TEMPERATURE ///
 
@@ -169,6 +271,15 @@ Comparison Graphs
 	  .append("g")
 	  .attr("transform",
 		"translate(" + margin.left + "," + margin.top + ")");
+
+      svg2.append("text")
+	  .attr("transform", "translate(100,0)")
+	  .attr("x", -60)
+	  .attr("y", -20)
+	  .attr("font-size", "16px")
+	  .text("Global Average Temperature Anomaly vs. Years")
+	  .attr("class", "x")
+	  .attr("class", "y")
 
       x2 = d3.scaleTime()
 	  .domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
@@ -184,6 +295,8 @@ Comparison Graphs
           .attr("stroke", "black")
           .text("Years");
 
+      console.log(edata);
+      
       y2 = d3.scaleLinear()
       //.domain([0, d3.max(tdata, function(d) { return +d.Total; })])
 	  .domain(d3.extent(tdata, function(d) { return +d.Total; }))
@@ -200,6 +313,28 @@ Comparison Graphs
           .attr("stroke", "black")
           .text("Global Average Temperature Anomaly (Celsius)");
 
+      svg2.call(tip);
+
+      const max = d3.max(tdata, function(d) { return +d.Total; })
+
+      svg2.append("linearGradient")
+	  .attr("id", "line-gradient")
+	  .attr("gradientUnits", "userSpaceOnUse")
+	  .attr("x1", 0)
+	  .attr("y1", y2(0))
+	  .attr("x2", 0)
+	  .attr("y2", y2(max))
+	  .selectAll("stop")
+          .data([
+              {offset: "0%", color: "#135409" },
+              {offset: "100%", color: "#56e93f"}
+          ])
+	  .enter().append("stop")
+          .attr("offset", function(d) { return d.offset; })
+          .attr("stop-color", function(d) { return d.color; });
+
+      svg.append("linearGradient")
+
        svg2.append("path")
 	  .datum(tdata)
 	  .attr("class", "line")
@@ -208,7 +343,7 @@ Comparison Graphs
 	  .attr("d", d3.line()
 		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y2(+d.Total) }))
-	  .attr("stroke", "orange")
+	  .attr("stroke", "url(#line-gradient)")
 	  .attr("stroke-width", 2);
 
       svg2.selectAll(".dot")
@@ -219,7 +354,9 @@ Comparison Graphs
 	  .attr("cx", function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y2(+d.Total) })
 	  .attr("r", 4)
-	  .attr("fill", "orange");
+	  .attr("fill", "url(#line-gradient)")
+	  .on('mouseover', tip.show)
+	  .on('mouseout', tip.hide);
       
 
   }
@@ -283,7 +420,7 @@ Comparison Graphs
 	  .attr("d", d3.line()
 		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y(+d.Total) }))
-          .attr("stroke", "green")
+          .attr("stroke", "url(#line-gradient)")
           .attr("stroke-width", 2);
 
       var lines2 = svg2.selectAll(".line")
@@ -300,7 +437,7 @@ Comparison Graphs
 	  .attr("d", d3.line()
 		.x(function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y2(+d.Total) }))
-          .attr("stroke", "orange")
+          .attr("stroke", "url(#line-gradient)")
           .attr("stroke-width", 2);
 
       var dots = svg.selectAll(".dot")
@@ -316,7 +453,7 @@ Comparison Graphs
 	  .attr("cx", function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y(+d.Total) })
 	  .attr("r", 4)
-	  .attr("fill", "green");
+	  .attr("fill", "url(#line-gradient)");
 
       var dots2 = svg2.selectAll(".dot")
 	  .data(tdata);
@@ -331,7 +468,7 @@ Comparison Graphs
 	  .attr("cx", function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y2(+d.Total) })
 	  .attr("r", 4)
-	  .attr("fill", "orange");
+	  .attr("fill", "url(#line-gradient)");
       
   };
 
@@ -374,7 +511,7 @@ Comparison Graphs
 	  .attr("d", d3.line()
 		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y(+d.Total) }))
-          .attr("stroke", "green")
+          .attr("stroke", "url(#line-gradient)")
           .attr("stroke-width", 2);
 
       var dots = svg.selectAll(".dot")
@@ -389,7 +526,7 @@ Comparison Graphs
 	  .attr("cx", function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y(+d.Total) })
 	  .attr("r", 4)
-	  .attr("fill", "green");
+	  .attr("fill", "url(#line-gradient)");
 
       //x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
       x2.domain([d3.min(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
@@ -421,7 +558,7 @@ Comparison Graphs
 	  .attr("d", d3.line()
 		.x(function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 		.y(function(d) { return y2(+d.Total) }))
-          .attr("stroke", "orange")
+          .attr("stroke",  "url(#line-gradient)")
           .attr("stroke-width", 2);
 
       var dots2 = svg2.selectAll(".dot")
@@ -437,7 +574,7 @@ Comparison Graphs
 	  .attr("cx", function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y2(+d.Total) })
 	  .attr("r", 4)
-	  .attr("fill", "orange");
+	  .attr("fill",  "url(#line-gradient)");
       
       
   };
@@ -542,13 +679,397 @@ Comparison Graphs
 	  .attr("cx", function(d) { return xm(+d.Temp); })
 	  .attr("cy", function(d) { return ym(+d.Carbon); })
 	  .attr("r", 4)
-	  .attr("fill", "green");
+	  .attr("fill", "url(#line-gradient)");
 
 
   };
 
   
-  render_double_graph();  
+  //render_double_graph();
+
+  var create_dict2 = function( data1, data2, y ) {
+      var dict = [];
+      for(i = 0; i < 20; i += 2) {
+	  dict[i] = { "Year" : y, "Total" : data1[y], "Type" : 0 }
+	  console.log(data2[y]);
+	  dict[i+1] = { "Year" : y, "Total" : data2[y], "Type" : 1}
+	  y++;
+      }
+      return dict;
+
+  }
+
+  var yee = 1901;
+
+  var render_us_global = function() {
+      
+      var tdatas = pick(alltdata, [yee, yee+1, yee+2, yee+3, yee+4, yee+5,
+				   yee+6, yee+7, yee+8, yee+9]);
+      var usdatas = pick(usadata, [yee, yee+1, yee+2, yee+3, yee+4, yee+5,
+				   yee+6, yee+7, yee+8, yee+9]);
+
+
+      var alltemp = create_dict2(tdatas, usdatas, yee);
+      console.log(alltemp);
+
+      var usdata = create_dict(usdatas, yee);
+      console.log(usdata);
+      var tdata = create_dict(tdatas, yee);
+      
+      var margin = {top: 50, right: 100, bottom: 60, left: 100},
+	  width = 800 - margin.left - margin.right,
+	  height = 600 - margin.top - margin.bottom;
+
+      canvas = d3.select("#space2")
+	  .append("svg")
+	  .attr("width", width + margin.left + margin.right)
+	  .attr("height", height + margin.top + margin.bottom)
+	  .attr("style", "border:4px solid green")
+	  .append("g")
+	  .attr("transform",
+		"translate(" + margin.left + "," + margin.top + ")");
+
+      var sumstat = d3.nest()
+	  .key(function(d) { return d.Type;})
+	  .entries(alltemp);
+
+      console.log(sumstat);
+
+      var tip = d3.tip()
+	  .attr('class', 'd3-tip')
+	  .offset([-10, 0])
+	  .html(function(d) {
+	      return "<strong>" + +d.Year + ": </strong> <span style='color:#bfffbb'>" + d.Total + "</span>";
+	  });
+
+      canvas.call(tip);
+
+      allx = d3.scaleTime()
+	  .domain(d3.extent(alltemp, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+	  .range([ 0, width ]);
+      canvas.append("g")
+	  .attr("transform", "translate(0," + height + ")")
+	  .attr("class", "trees")
+	  .call(d3.axisBottom(allx))
+	  .append("text")
+	  .attr("font-size", "14px")
+	  .attr("x", 300)
+	  .attr("y", 35)
+          .attr("stroke", "black")
+          .text("Years");
+
+      ally = d3.scaleLinear()
+	  .domain(d3.extent(alltemp, function(d) { return +d.Total; }))
+	  .range([ height, 0 ]);
+      canvas.append("g")
+	  .attr("class", "leaves")
+	  .call(d3.axisLeft(ally))
+	  .append("text")
+	  .attr("transform", "rotate(-90)")
+          .attr("dy", "-4.5em")
+	  .attr("dx", "-4.0em")
+	  .attr("font-size", "14px")
+	  .attr("x", 20)
+          .attr("stroke", "black")
+          .text("Global Average Temperature Anomaly (Celsius)");
+
+      xtee = d3.scaleTime()
+	  .domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+	  .range([ 0, width ]);
+      
+      ytee = d3.scaleLinear()
+	  .domain(d3.extent(usdata, function(d) { return +d.Total; }))
+	  .range([ height, 0 ]);
+
+      var res = sumstat.map(function(d){ return d.key }) // list of group names
+      //console.log(res);
+      var color = d3.scaleOrdinal()
+	  .domain(res)
+	  .range(['#e41a1c','#377eb8']);
+
+      //var linet = canvas.selectAll(".line")
+      //  .datum(sumstat);
+      
+      canvas.append("path")
+	  .datum(usdata)
+	  .attr("class", "usline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ytee(+d.Total); }))
+	  .attr("stroke", "#4ef943")
+	  .attr("stroke-width", 2);
+
+      canvas.selectAll(".usdot")
+	  .data(usdata)
+	  .enter().append("circle")
+	  .attr("class", "usdot")
+	  .attr("cx", function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ytee(+d.Total) })
+	  .attr("r", 6)
+	  .attr("fill", "#4ef943")
+	  .on('mouseover', tip.show)
+	  .on('mouseout', tip.hide);
+
+
+      xt = d3.scaleTime()
+	  .domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+	  .range([ 0, width ]);
+      
+      yt = d3.scaleLinear()
+	  .domain(d3.extent(tdata, function(d) { return +d.Total; }))
+	  .range([ height, 0 ]);
+
+          
+      canvas.append("path")
+	  .datum(tdata)
+	  .attr("class", "globalline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xt(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yt(+d.Total); }))
+	  .attr("stroke", "#065c00")
+	  .attr("stroke-width", 2);
+
+      canvas.selectAll(".gdot")
+	  .data(tdata)
+	  .enter().append("circle")
+	  .attr("class", "gdot")
+	  .attr("cx", function(d) { return xt(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yt(+d.Total) })
+	  .attr("r", 6)
+	  .attr("fill", "#065c00")
+	  .on('mouseover', tip.show)
+	  .on('mouseout', tip.hide);
+      
+      
+      /*canvas.selectAll(".line")
+	  .data(usdata)
+	  .enter()
+	  .append("path")
+          .attr("fill", "none")
+      //.attr("stroke", function(d){ return color(d.key) })
+	  .attr("stroke", "red")
+          .attr("stroke-width", 1.5)
+          .attr("d", function(d){
+              return d3.line()
+		  .x(function(d) { return xt(+d.Year); })
+		  .y(function(d) { return yt(+d.Total); })
+		  //(d.values)
+		  })*/
+
+      canvas.append("circle").attr("cx",20).attr("cy",-30).attr("r", 6).style("fill", "#4ef943")
+      canvas.append("circle").attr("cx",300).attr("cy",-30).attr("r", 6).style("fill", "#065c00")
+      canvas.append("text").attr("x", 33).attr("y", -25).text("U.S. Average Temp Anomaly").style("font-size", "15px").attr("alignment-baseline","middle")
+      canvas.append("text").attr("x", 313).attr("y", -25).text("Global Average Temp Anomaly").style("font-size", "15px").attr("alignment-baseline","middle")
+      
+  }
+
+  render_us_global();
+
+  var go_forward_temp = function(e) {
+      if (yee + 10 <= 2010) yee += 10;
+      var tdatas = pick(alltdata, [yee, yee+1, yee+2, yee+3, yee+4, yee+5,
+				   yee+6, yee+7, yee+8, yee+9]);
+      var usdatas = pick(usadata, [yee, yee+1, yee+2, yee+3, yee+4, yee+5,
+				   yee+6, yee+7, yee+8, yee+9]);
+
+
+      var alltemp = create_dict2(tdatas, usdatas, yee);
+      console.log(alltemp);
+
+      var usdata = create_dict(usdatas, yee);
+      console.log(usdata);
+      var tdata = create_dict(tdatas, yee);
+
+      allx.domain([d3.min(alltemp, function(d) { return d3.timeParse("%Y")(+d.Year); }),
+      		   d3.max(alltemp, function(d) { return d3.timeParse("%Y")(+d.Year); })])
+      canvas.select(".trees")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisBottom(allx));
+
+      ally.domain(d3.extent(alltemp, function(d) { return +d.Total; }))
+      canvas.select(".leaves")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisLeft(ally));
+
+      xtee.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ytee.domain(d3.extent(usdata, function(d) { return +d.Total; }))
+      xt.domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      yt.domain(d3.extent(tdata, function(d) { return +d.Total; }))
+
+      var usline = canvas.selectAll(".usline")
+	  .datum(usdata);
+
+      usline
+	  .enter().append("path")
+	  .datum(usdata)
+	  .attr("class", "usline")
+	  .merge(usline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ytee(+d.Total) }))
+          .attr("stroke", "#4ef943")
+	  .attr("stroke-width", 2);
+
+      var usdots = canvas.selectAll(".usdot")
+	  .data(usdata);
+
+      usdots
+	  .enter().append("circle")
+	  .attr("class", "usdot")
+	  .merge(usdots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ytee(+d.Total) })
+	  .attr("r", 6)
+	  .attr("fill",  "#4ef943");
+
+
+      var globalline = canvas.selectAll(".globalline")
+	  .datum(tdata);
+
+      globalline
+	  .enter().append("path")
+	  .datum(globalline)
+	  .attr("class", "globalline")
+	  .merge(globalline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xt(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yt(+d.Total) }))
+          .attr("stroke", "#065c00")
+	  .attr("stroke-width", 2);
+
+      var gdots = canvas.selectAll(".gdot")
+	  .data(tdata);
+
+      gdots
+	  .enter().append("circle")
+	  .attr("class", "gdot")
+	  .merge(gdots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xt(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yt(+d.Total) })
+	  .attr("r", 6)
+	  .attr("fill",  "#065c00");
+
+  }
+
+  var go_backward_temp = function(e) {
+      if (yee - 10 >= 1901) yee -= 10;
+      var tdatas = pick(alltdata, [yee, yee+1, yee+2, yee+3, yee+4, yee+5,
+				   yee+6, yee+7, yee+8, yee+9]);
+      var usdatas = pick(usadata, [yee, yee+1, yee+2, yee+3, yee+4, yee+5,
+				   yee+6, yee+7, yee+8, yee+9]);
+
+
+      var alltemp = create_dict2(tdatas, usdatas, yee);
+      console.log(alltemp);
+
+      var usdata = create_dict(usdatas, yee);
+      console.log(usdata);
+      var tdata = create_dict(tdatas, yee);
+
+      allx.domain([d3.min(alltemp, function(d) { return d3.timeParse("%Y")(+d.Year); }),
+      		   d3.max(alltemp, function(d) { return d3.timeParse("%Y")(+d.Year); })])
+      canvas.select(".trees")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisBottom(allx));
+
+      ally.domain(d3.extent(alltemp, function(d) { return +d.Total; }))
+      canvas.select(".leaves")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisLeft(ally));
+
+      xtee.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ytee.domain(d3.extent(usdata, function(d) { return +d.Total; }))
+      xt.domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      yt.domain(d3.extent(tdata, function(d) { return +d.Total; }))
+
+      var usline = canvas.selectAll(".usline")
+	  .datum(usdata);
+
+      usline
+	  .enter().append("path")
+	  .datum(usdata)
+	  .attr("class", "usline")
+	  .merge(usline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ytee(+d.Total) }))
+          .attr("stroke", "#4ef943")
+	  .attr("stroke-width", 2);
+
+      var usdots = canvas.selectAll(".usdot")
+	  .data(usdata);
+
+      usdots
+	  .enter().append("circle")
+	  .attr("class", "usdot")
+	  .merge(usdots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ytee(+d.Total) })
+	  .attr("r", 6)
+	  .attr("fill",  "#4ef943");
+
+
+      var globalline = canvas.selectAll(".globalline")
+	  .datum(tdata);
+
+      globalline
+	  .enter().append("path")
+	  .datum(globalline)
+	  .attr("class", "globalline")
+	  .merge(globalline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xt(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yt(+d.Total) }))
+          .attr("stroke", "#065c00")
+	  .attr("stroke-width", 2);
+
+      var gdots = canvas.selectAll(".gdot")
+	  .data(tdata);
+
+      gdots
+	  .enter().append("circle")
+	  .attr("class", "gdot")
+	  .merge(gdots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xt(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yt(+d.Total) })
+	  .attr("r", 6)
+	  .attr("fill",  "#065c00");
+
+
+  }
+  
+
+  var forwardscroll = document.getElementById("change3");
+  forwardscroll.addEventListener('click', go_forward_temp);
+
+  var backwardscroll = document.getElementById("change4");
+  backwardscroll.addEventListener('click', go_backward_temp);
   
 
 </script>

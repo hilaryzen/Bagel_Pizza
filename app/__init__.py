@@ -16,12 +16,15 @@ usTempValue = {}
 # {1901: -0.15, 1902: -0.43, etc}
 usTempAnomaly = {}
 
+def fToc(value):
+    return (value - 32) / 1.80
+
 def importUsTemp(fileName):
     with open(fileName, 'r') as file:
         data = json.loads(file.read())['data']
         date = 1901
         for i in data:
-            if int(i) / 100 >= 1901 and int(i) / 100 <= 2001:
+            if int(i) / 100 >= 1901 and int(i) / 100 <= 2011:
                 usTempValue[date] = float(data[i]['value'])
                 usTempAnomaly[date] = float(data[i]['anomaly'])
                 date += 1
@@ -65,7 +68,7 @@ def emissions():
 
 @app.route("/compare")
 def compare():
-    return render_template("alldata.html", globalEmissions = globalco2, globalTemp = globalTemp, usTemp = usTempValue)
+    return render_template("alldata.html", globalEmissions = globalco2, globalTemp = globalTemp, usTemp = usTempValue, usAnomaly = usTempAnomaly)
 
 if __name__ == "__main__":
     app.debug = True
