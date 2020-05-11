@@ -93,6 +93,17 @@ oneCountry = {}
 importCO2("SWEDEN")
 oneCountry = {}
 importCO2("PERU")
+oneCountry= {}
+importCO2("JAPAN (EXCLUDING THE RUYUKU ISLANDS)")
+oneCountry = {}
+importCO2("FRANCE (INCLUDING MONACO)")
+oneCountry = {}
+importCO2("ITALY (INCLUDING SAN MARINO)")
+oneCountry = {}
+importCO2("AUSTRALIA")
+oneCountry = {}
+importCO2("BELGIUM")
+oneCountry = {}
 
 yearlyCountryCO2 = {} # the dictionary
 oneYear = {}
@@ -121,7 +132,7 @@ def temperature():
 @app.route("/emissions")
 def emissions():
     importGlobalCO2("static/co2-global.csv")
-    return render_template("carbon.html", globalEmissions = globalco2)
+    return render_template("carbon.html", globalEmissions = globalco2, countryCO2 = countryco2)
 
 @app.route("/compare")
 def compare():

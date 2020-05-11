@@ -1109,6 +1109,16 @@ Comparison Graphs
           .attr("stroke", "black")
           .text("Total carbon emissions (million metric tons of C)");
 
+      var tip = d3.tip()
+	  .attr('class', 'd3-tip')
+	  .offset([-10, 0])
+	  .attr('width', '100px')
+	  .html(function(d) {
+	      return "<strong>" + +d.Year + ": </strong> <span style='color:#bfffbb'>" + d.Total + "</span>";
+	  });
+
+      //canvas2.call(tip);
+
       xus = d3.scaleTime()
 	  .domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(d.Year); }))
 	  .range([ 0, width ]);
@@ -1298,6 +1308,7 @@ Comparison Graphs
 	  .attr("display", "none")
       //.on('mouseover', tip.show)
       //.on('mouseout', tip.hide);
+*/
       canvas2.selectAll(".chinadot")
 	  .data(greecedata)
 	  .enter().append("circle")
@@ -1309,7 +1320,7 @@ Comparison Graphs
 	  .attr("display", "none")
       //.on('mouseover', tip.show)
       //.on('mouseout', tip.hide);
-*/
+
       canvas2.selectAll(".indiadot")
 	  .data(indiadata)
 	  .enter().append("circle")
@@ -1658,6 +1669,18 @@ Comparison Graphs
 	  .attr("cy", function(d) { return yindia(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill",  "#ff74fb");
+      var chinadots = canvas2.selectAll(".chinadot")
+	  .data(greecedata);
+      chinadots
+	  .enter().append("circle")
+	  .attr("class", "chinadot")
+	  .merge(chinadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ygreece(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "blue");
       var polanddots = canvas2.selectAll(".polanddot")
 	  .data(polanddata);
       polanddots
@@ -1998,6 +2021,18 @@ Comparison Graphs
 	  .attr("cy", function(d) { return yindia(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill",  "#ff74fb");
+      var chinadots = canvas2.selectAll(".chinadot")
+	  .data(greecedata);
+      chinadots
+	  .enter().append("circle")
+	  .attr("class", "chinadot")
+	  .merge(chinadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ygreece(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "blue");
       var polanddots = canvas2.selectAll(".polanddot")
 	  .data(polanddata);
       polanddots
@@ -2238,6 +2273,18 @@ Comparison Graphs
 	  .attr("cy", function(d) { return yindia(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill",  "#ff74fb");
+      var chinadots = canvas2.selectAll(".chinadot")
+	  .data(greecedata);
+      chinadots
+	  .enter().append("circle")
+	  .attr("class", "chinadot")
+	  .merge(chinadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ygreece(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "blue");
       var polanddots = canvas2.selectAll(".polanddot")
 	  .data(polanddata);
       polanddots
@@ -2494,6 +2541,18 @@ Comparison Graphs
 	  .attr("cy", function(d) { return yindia(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill",  "#ff74fb");
+      var chinadots = canvas2.selectAll(".chinadot")
+	  .data(greecedata);
+      chinadots
+	  .enter().append("circle")
+	  .attr("class", "chinadot")
+	  .merge(chinadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ygreece(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "blue");
       var polanddots = canvas2.selectAll(".polanddot")
 	  .data(polanddata);
       polanddots
@@ -2585,6 +2644,32 @@ Comparison Graphs
 	  .attr("display", "none");
   }
 
+  var display_china = function(name, name2) {
+
+      var linename = "." + name + "line";
+      var dotname = "." + name2 + "dot";
+      
+      canvas2.selectAll(linename)
+	  .attr("display", "block");
+
+      canvas2.selectAll(dotname)
+	  .attr("display", "block");
+
+  }
+
+  var dont_display_china = function(name, name2) {
+
+      var linename = "." + name + "line";
+      var dotname = "." + name2 + "dot";
+      
+      canvas2.selectAll(linename)
+	  .attr("display", "none");
+
+      canvas2.selectAll(dotname)
+	  .attr("display", "none");
+
+  }
+
   var checkUS = document.getElementById("us");
   checkUS.addEventListener('click', function() {
       if (this.checked) {
@@ -2612,9 +2697,9 @@ Comparison Graphs
 
   document.getElementById("greece").addEventListener('click', function() {
       if(this.checked) {
-	  display("greece");
+	  display_china("greece","china");
       } else {
-	  dont_display("greece");
+	  dont_display_china("greece", "china");
       }
   });
 
