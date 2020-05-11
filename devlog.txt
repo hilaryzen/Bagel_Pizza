@@ -65,3 +65,7 @@ aliceN -- 2020-05-11 02:03
 aliceN -- 2020-05-11 02:11
 - Edited the design doc so it accurately describes what each page of the site contains
 - Removed files we ended up not using: data.py, data.js
+
+aliceN -- 2020-05-11 18:44
+- Added the pie chart to the carbon emissions page. Hover functionality working.
+- Fixed minor dot problem for compare data page
