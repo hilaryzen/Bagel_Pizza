@@ -61,24 +61,37 @@ def importCO2(country):
     with open("static/co2-emissions.csv", 'r') as file:
         data = csv.reader(file)
         for row in data:
-            if row[1] == country and int(row[0]) >= 1901 and int(row[0]) <= 2000:
+            if row[1] == country and int(row[0]) >= 1901 and int(row[0]) <= 2010:
                 oneCountry[int(row[0])] = float(row[2])
-    countryco2[country] = oneCountry
-    
+        countryco2[country] = oneCountry
+
 
 importCO2("UNITED KINGDOM")
+oneCountry = {}
 importCO2("CANADA")
+oneCountry = {}
 importCO2("GERMANY")
-importCO2("UNITED STATES")
+oneCountry = {}
+importCO2("UNITED STATES OF AMERICA")
+oneCountry = {}
 importCO2("POLAND")
+oneCountry = {}
 importCO2("SPAIN")
+oneCountry = {}
 importCO2("NORWAY")
+oneCountry = {}
 importCO2("INDIA")
+oneCountry = {}
 importCO2("PORTUGAL")
+oneCountry = {}
 importCO2("VIET NAM")
+oneCountry = {}
 importCO2("HUNGARY")
-importCO2("GREECE")
+oneCountry = {}
+importCO2("CHINA (MAINLAND)")
+oneCountry = {}
 importCO2("SWEDEN")
+oneCountry = {}
 importCO2("PERU")
 
 yearlyCountryCO2 = {} # the dictionary
@@ -90,7 +103,7 @@ def importYearCO2(filename):
     with open(filename, 'r') as file:
         data = csv.reader(file)
         year = "1901"
-        while int(year) <= 2000:
+        while int(year) <= 2010:
             for row in data:
                if year == row[0] and row[1] in keys:
                     oneYear[row[1]] = float(row[2])
@@ -112,7 +125,7 @@ def emissions():
 
 @app.route("/compare")
 def compare():
-    return render_template("alldata.html", globalEmissions = globalco2, globalTemp = globalTemp, usTemp = usTempValue, usAnomaly = usTempAnomaly)
+    return render_template("alldata.html", globalEmissions = globalco2, globalTemp = globalTemp, usTemp = usTempValue, usAnomaly = usTempAnomaly, countryEmissions = yearlyCountryCO2, countryCO2 = countryco2)
 
 if __name__ == "__main__":
     app.debug = True

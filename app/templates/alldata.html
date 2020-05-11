@@ -10,7 +10,7 @@ Comparison Graphs
 <script src="../static/d3-tip.js"></script>
 
 <center>
-  <p> Click to toggle between decades! Hover over each dot to see specific data! </p>
+  <p> Click to toggle between decades. Hover over each dot to see specific data. </p>
   <button class="btn btn-success" id="change">Go Forward 10 Years</button>
   <button class="btn btn-success" id="change2">Go Back 10 Years</button>
   <br><br>
@@ -18,20 +18,90 @@ Comparison Graphs
   <p id="space"></p>
   <br><br>
 
-
   <div id="column1">
     <p id="space2"></p>
   </div>
-  <br><br><br><br><br><br><br><br><br>
+  <br><br><br><br><br><br><br><br>
   
   <div id="column2">
-    <p> Click to toggle for U.S. vs world temp anomaly! </p>
+    <p> Click to toggle for U.S. vs. Global temp anomaly. </p>
     <button class="btn btn-success" id="change3">Go Forward 10 Years</button>
     <br><br>
     <button class="btn btn-success" id="change4">Go Back 10 Years</button>
+    <br><br>
   </div>
-  
 
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <div id="column3">
+    <p id="space3"></p>
+  </div>
+  <br><br>
+
+  <div id="column4">
+    
+    <p> Click for certain countries!</p>
+    <button class="btn btn-success" id="change5">Go Forward 10 Years</button>
+    <br><br>
+    <button class="btn btn-success" id="change6">Go Back 10 Years</button>
+    <br><br>
+    <button class="btn btn-danger" id="removeus">Remove USA</button>
+    <br><br>
+    <div id="column5">
+      <div id="radios">
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="us">
+	  <label class="form-check-label" for="us" style="color:red">United States</label>
+	</div>
+	<br>
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="canada">
+	  <label class="form-check-label" for="canada" style="color:orange">Canada</label>
+	</div>
+	<br>
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="germany">
+	  <label class="form-check-label" for="germany" style="color:green">Germany</label>
+	</div>
+	<br>
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="greece">
+	  <label class="form-check-label" for="greece" style="color:blue">China</label>
+	</div>
+	<br>
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="india">
+	  <label class="form-check-label" for="india" style="color:#ff74fb">India</label>
+	</div>
+	<br>
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="poland">
+	  <label class="form-check-label" for="poland" style="color:#9503a9">Poland</label>
+	</div>
+	<br>
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="spain">
+	  <label class="form-check-label" for="spain" style="color:gray">Spain</label>
+	</div>
+	<br>
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="sweden">
+	  <label class="form-check-label" for="sweden" style="color:#65e354">Sweden</label>
+	</div>
+	<br>
+	<div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="" id="uk">
+	  <label class="form-check-label" for="uk" style="color:#47dde4">United Kingdom</label>
+	</div>
+	<br>
+      </div>
+    </div>
+  </div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <p style="color:green">*Note: The U.S.'s carbon emissions are far greater than many other countries, so there is an option to remove the U.S. from the graph for a more meaningful comparison.</p>
+  <p style="color:green">**Note: If the line doesn't appear for certain data points, that means the data wasn't present in the CSV file.</p>
+
+  <br><br>
+  
 </center>
 <style>
 
@@ -70,6 +140,27 @@ Comparison Graphs
       width: 40%;
   }
 
+  #column3 {
+      float: right;
+      width: 70%;
+  }
+
+  #column4 {
+      float: left;
+      width: 35%;
+  }
+
+  #column5 {
+      float: right;
+      width: 65%;
+  }
+
+  #radios {
+      float: left;
+      width: 300%;
+      text-align: justify;
+  }
+
   .d3-tip {
       line-height: 0;
       font-weight: bold;
@@ -106,16 +197,14 @@ Comparison Graphs
 
 <script>
 
-  //style = "position:absolute; left:70px; top:600px;"
-
   var svg, x, y;
   var year = 1901;
   var alledata = {{ globalEmissions }}
   var alltdata = {{ globalTemp }}
   var ustdata = {{ usTemp }}
   var usadata = {{ usAnomaly }}
-
-  console.log(usadata);
+  var country1 = {{ countryEmissions | safe }}
+  var country2 = {{ countryCO2 | safe }}
   
   var pick = function (obj, props) {
 
@@ -140,7 +229,6 @@ Comparison Graphs
   var create_dict = function(data, y) {
       var dict = [];
       for(i = 0; i < Object.keys(data).length; i++) {
-	  //console.log(data[y]);
 	  dict[i] = { "Year" : Object.keys(data)[i], "Total" : data[y] }
 	  y++;;
       }
@@ -154,26 +242,13 @@ Comparison Graphs
 	 
   var render_line_chart = function(e) {
 
-      //console.log(alledata);
-      //console.log(alltdata);
-
       var edatas = pick(alledata, [year, year+1, year+2, year+3, year+4,
 				   year+5, year+6, year+7, year+8, year+9]);
       var tdatas = pick(alltdata, [year, year+1, year+2, year+3, year+4, year+5,
 				   year+6, year+7, year+8, year+9]);
-
-      //console.log(edata);
-      //console.log(tdata);
       
       var edata = create_dict(edatas, year);
       var tdata = create_dict(tdatas, year);
-      
-      //console.log(edata);
-      //console.log(Object.keys(edata).length);
-      //console.log(d3.extent(edata, function(d) { return +d.Year; }));
-      //console.log(edata[0]);
-
-      //console.log(tdata);
 
       var margin = {top: 50, right: 100, bottom: 60, left: 100},
 	  width = 600 - margin.left - margin.right,
@@ -198,10 +273,8 @@ Comparison Graphs
 	  .attr("class", "y")
 
       x = d3.scaleTime()
-      //.domain(d3.extent(edata, function(d) { return d.Year; }))
 	  .domain([d3.min(edata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
       		   d3.max(edata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
-	  //.domain(d3.extent(edata, function(m) { return m.date; }))
 	  .range([ 0, width ]);
       svg.append("g")
 	  .attr("transform", "translate(0," + height + ")")
@@ -294,11 +367,8 @@ Comparison Graphs
 	  .attr("y", 35)
           .attr("stroke", "black")
           .text("Years");
-
-      console.log(edata);
       
       y2 = d3.scaleLinear()
-      //.domain([0, d3.max(tdata, function(d) { return +d.Total; })])
 	  .domain(d3.extent(tdata, function(d) { return +d.Total; }))
 	  .range([ height, 0 ]);
       svg2.append("g")
@@ -338,7 +408,6 @@ Comparison Graphs
        svg2.append("path")
 	  .datum(tdata)
 	  .attr("class", "line")
-	  //.attr("class", "orange dot")
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
 		.x(function(d) { return x(d3.timeParse("%Y")(+d.Year)); })
@@ -349,7 +418,6 @@ Comparison Graphs
       svg2.selectAll(".dot")
 	  .data(tdata)
 	  .enter().append("circle")
-	  //.attr("class", "orange dot")
 	  .attr("class", "dot") 
 	  .attr("cx", function(d) { return x2(d3.timeParse("%Y")(+d.Year)); })
 	  .attr("cy", function(d) { return y2(+d.Total) })
@@ -370,15 +438,7 @@ Comparison Graphs
 
       var edata = create_dict(edatas, year);
       var tdata = create_dict(tdatas, year);
-      console.log(d3.min(edata, function(d) { return d.Year; }));
-      console.log(d3.max(edata, function(d) { return d.Year; }));
-      
 
-      console.log(edata);
-      
-      //x.domain(d3.extent(edata, function(d) { return +d.Year; }));
-      //x.domain([d3.min(edata, function(d) { return +d.Year; }),
-      //	d3.max(edata, function(d) { return +d.Year; })]);
       x.domain([d3.min(edata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
       		d3.max(edata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
       svg.select(".chickens")
@@ -386,7 +446,6 @@ Comparison Graphs
 	  .duration(2000)
 	  .call(d3.axisBottom(x));
 
-      //x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
       x2.domain([d3.min(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
       		 d3.max(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
       svg2.select(".horses")
@@ -461,7 +520,6 @@ Comparison Graphs
       dots2
 	  .enter().append("circle")
 	  .attr("class", "dot")
-	  //.attr("class", "orange dot")
 	  .merge(dots2)
 	  .transition()
 	  .duration(2000)
@@ -481,9 +539,7 @@ Comparison Graphs
 
       var edata = create_dict(edatas, year);
       var tdata = create_dict(tdatas, year);
-      //console.log(edata);
-
-      //x.domain(d3.extent(edata, function(d) { return +d.Year; }));
+ 
       x.domain([d3.min(edata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
       		d3.max(edata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
       svg.select(".chickens")
@@ -528,7 +584,6 @@ Comparison Graphs
 	  .attr("r", 4)
 	  .attr("fill", "url(#line-gradient)");
 
-      //x2.domain(d3.extent(tdata, function(d) { return +d.Year; }));
       x2.domain([d3.min(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }),
       		 d3.max(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); })])
       svg2.select(".horses")
@@ -567,7 +622,6 @@ Comparison Graphs
       dots2
 	  .enter().append("circle")
 	  .attr("class", "dot")
-      //.attr("class", "orange dot")
 	  .merge(dots2)
 	  .transition()
 	  .duration(2000)
@@ -593,105 +647,10 @@ Comparison Graphs
   var canvas, x, y;
   var year = 1901;
 
-  var create_dual_dict = function(data1, data2, y) {
-      var dict = [];
-      for(i = 0; i < 10; i++) {
-	  dict[i] = { "Year" : Object.keys(data1)[i], "Carbon" : data1[y],
-		      "Temp" : data2[y] }
-	  y++;
-      }
-      return dict;
-  }
-
-  var render_double_graph = function() {
-      //var space2 = document.getElementById('space2');
-
-      var edatas = pick(alledata, [year, year+1, year+2, year+3, year+4,
-				   year+5, year+6, year+7, year+8, year+9]);
-      var tdatas = pick(alltdata, [year, year+1, year+2, year+3, year+4, year+5,
-				   year+6, year+7, year+8, year+9]);
-
-      var alldata = create_dual_dict(edatas, tdatas, year);
-      console.log(alldata);
-      
-      var tdata = create_dict(tdatas, year);
-      
-      //console.log(tdata);
-
-      var margin = {top: 50, right: 100, bottom: 60, left: 100},
-	  width = 800 - margin.left - margin.right,
-	  height = 600 - margin.top - margin.bottom;
-
-      canvas = d3.select("#space2")
-	  .append("svg")
-	  .attr("width", width + margin.left + margin.right)
-	  .attr("height", height + margin.top + margin.bottom)
-	  .attr("style", "border:4px solid green")
-	  .append("g")
-	  .attr("transform",
-		"translate(" + margin.left + "," + margin.top + ")");
-
-      xm = d3.scaleLinear()
-      //.domain([0, d3.max(tdata, function(d) { return +d.Total; })])
-	  .domain(d3.extent(alldata, function(d) { return +d.Temp; }))
-	  .range([ height, 0 ])
-	  .nice();
-      canvas.append("g")
-	  //.attr("class", "xaxis")
-	  .attr("transform", "translate(0," + height + ")")
-	  .call(d3.axisBottom(xm))
-	  .append("text")
-	  //.attr("transform", "rotate(-90)")
-          .attr("dy", "-4.5em")
-	  .attr("dx", "-4.0em")
-	  .attr("font-size", "10px")
-          .attr("stroke", "black")
-          //.text("Global Average Temperature Anomaly (Celsius)");
-
-      ym = d3.scaleLinear()
-	  .domain([0, d3.max(alldata, function(d) { return +d.Carbon; })])
-	  .range([ height, 0 ]);
-      canvas.append("g")
-	  //.attr("class", "yaxis")
-	  .call(d3.axisLeft(ym))
-	  .append("text")
-	  //.attr("transform", "rotate(-90)")
-          .attr("dy", "-4.5em")
-	  .attr("dx", "-4.0em")
-	  .attr("font-size", "10px")
-          .attr("stroke", "black")
-      //.text("Total carbon emissions (million metric tons of C)");
-
-      canvas.append("path")
-	  .datum(alldata)
-	  .attr("class", "merged line")
-	  .attr("fill", "none")
-	  .attr("d", d3.line()
-		.x(function(d) { return xm(+d.Temp); })
-		.y(function(d) { return ym(+d.Carbon); }))
-	  .attr("stroke", "green")
-	  .attr("stroke-width", 2);
-
-      canvas.selectAll(".dot")
-	  .data(alldata)
-	  .enter().append("circle")
-	  .attr("class", "merged dot")
-	  .attr("cx", function(d) { return xm(+d.Temp); })
-	  .attr("cy", function(d) { return ym(+d.Carbon); })
-	  .attr("r", 4)
-	  .attr("fill", "url(#line-gradient)");
-
-
-  };
-
-  
-  //render_double_graph();
-
   var create_dict2 = function( data1, data2, y ) {
       var dict = [];
       for(i = 0; i < 20; i += 2) {
 	  dict[i] = { "Year" : y, "Total" : data1[y], "Type" : 0 }
-	  console.log(data2[y]);
 	  dict[i+1] = { "Year" : y, "Total" : data2[y], "Type" : 1}
 	  y++;
       }
@@ -710,10 +669,7 @@ Comparison Graphs
 
 
       var alltemp = create_dict2(tdatas, usdatas, yee);
-      console.log(alltemp);
-
       var usdata = create_dict(usdatas, yee);
-      console.log(usdata);
       var tdata = create_dict(tdatas, yee);
       
       var margin = {top: 50, right: 100, bottom: 60, left: 100},
@@ -732,8 +688,6 @@ Comparison Graphs
       var sumstat = d3.nest()
 	  .key(function(d) { return d.Type;})
 	  .entries(alltemp);
-
-      console.log(sumstat);
 
       var tip = d3.tip()
 	  .attr('class', 'd3-tip')
@@ -773,30 +727,26 @@ Comparison Graphs
           .attr("stroke", "black")
           .text("Global Average Temperature Anomaly (Celsius)");
 
-      xtee = d3.scaleTime()
+      usx = d3.scaleTime()
 	  .domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
 	  .range([ 0, width ]);
       
-      ytee = d3.scaleLinear()
+      usy = d3.scaleLinear()
 	  .domain(d3.extent(usdata, function(d) { return +d.Total; }))
 	  .range([ height, 0 ]);
 
       var res = sumstat.map(function(d){ return d.key }) // list of group names
-      //console.log(res);
       var color = d3.scaleOrdinal()
 	  .domain(res)
 	  .range(['#e41a1c','#377eb8']);
-
-      //var linet = canvas.selectAll(".line")
-      //  .datum(sumstat);
       
       canvas.append("path")
 	  .datum(usdata)
 	  .attr("class", "usline")
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
-		.y(function(d) { return ytee(+d.Total); }))
+		.x(function(d) { return usx(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return usy(+d.Total); }))
 	  .attr("stroke", "#4ef943")
 	  .attr("stroke-width", 2);
 
@@ -804,12 +754,12 @@ Comparison Graphs
 	  .data(usdata)
 	  .enter().append("circle")
 	  .attr("class", "usdot")
-	  .attr("cx", function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
-	  .attr("cy", function(d) { return ytee(+d.Total) })
+	  .attr("cx", function(d) { return usx(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return usy(+d.Total) })
 	  .attr("r", 6)
 	  .attr("fill", "#4ef943")
 	  .on('mouseover', tip.show)
-	  .on('mouseout', tip.hide);
+	  .on('mouseout', tip.hide);  
 
 
       xt = d3.scaleTime()
@@ -817,7 +767,7 @@ Comparison Graphs
 	  .range([ 0, width ]);
       
       yt = d3.scaleLinear()
-	  .domain(d3.extent(tdata, function(d) { return +d.Total; }))
+	  .domain(d3.extent(alltemp, function(d) { return +d.Total; }))
 	  .range([ height, 0 ]);
 
           
@@ -841,22 +791,6 @@ Comparison Graphs
 	  .attr("fill", "#065c00")
 	  .on('mouseover', tip.show)
 	  .on('mouseout', tip.hide);
-      
-      
-      /*canvas.selectAll(".line")
-	  .data(usdata)
-	  .enter()
-	  .append("path")
-          .attr("fill", "none")
-      //.attr("stroke", function(d){ return color(d.key) })
-	  .attr("stroke", "red")
-          .attr("stroke-width", 1.5)
-          .attr("d", function(d){
-              return d3.line()
-		  .x(function(d) { return xt(+d.Year); })
-		  .y(function(d) { return yt(+d.Total); })
-		  //(d.values)
-		  })*/
 
       canvas.append("circle").attr("cx",20).attr("cy",-30).attr("r", 6).style("fill", "#4ef943")
       canvas.append("circle").attr("cx",300).attr("cy",-30).attr("r", 6).style("fill", "#065c00")
@@ -876,10 +810,8 @@ Comparison Graphs
 
 
       var alltemp = create_dict2(tdatas, usdatas, yee);
-      console.log(alltemp);
 
       var usdata = create_dict(usdatas, yee);
-      console.log(usdata);
       var tdata = create_dict(tdatas, yee);
 
       allx.domain([d3.min(alltemp, function(d) { return d3.timeParse("%Y")(+d.Year); }),
@@ -895,10 +827,10 @@ Comparison Graphs
 	  .duration(2000)
 	  .call(d3.axisLeft(ally));
 
-      xtee.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
-      ytee.domain(d3.extent(usdata, function(d) { return +d.Total; }))
+      usx.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      usy.domain(d3.extent(usdata, function(d) { return +d.Total; }))
       xt.domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
-      yt.domain(d3.extent(tdata, function(d) { return +d.Total; }))
+      yt.domain(d3.extent(alltemp, function(d) { return +d.Total; }))
 
       var usline = canvas.selectAll(".usline")
 	  .datum(usdata);
@@ -912,8 +844,8 @@ Comparison Graphs
 	  .duration(2000)
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
-		.y(function(d) { return ytee(+d.Total) }))
+		.x(function(d) { return usx(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return usy(+d.Total) }))
           .attr("stroke", "#4ef943")
 	  .attr("stroke-width", 2);
 
@@ -926,8 +858,8 @@ Comparison Graphs
 	  .merge(usdots)
 	  .transition()
 	  .duration(2000)
-	  .attr("cx", function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
-	  .attr("cy", function(d) { return ytee(+d.Total) })
+	  .attr("cx", function(d) { return usx(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return usy(+d.Total) })
 	  .attr("r", 6)
 	  .attr("fill",  "#4ef943");
 
@@ -966,18 +898,16 @@ Comparison Graphs
   }
 
   var go_backward_temp = function(e) {
+      
       if (yee - 10 >= 1901) yee -= 10;
+      
       var tdatas = pick(alltdata, [yee, yee+1, yee+2, yee+3, yee+4, yee+5,
 				   yee+6, yee+7, yee+8, yee+9]);
       var usdatas = pick(usadata, [yee, yee+1, yee+2, yee+3, yee+4, yee+5,
 				   yee+6, yee+7, yee+8, yee+9]);
 
-
       var alltemp = create_dict2(tdatas, usdatas, yee);
-      console.log(alltemp);
-
       var usdata = create_dict(usdatas, yee);
-      console.log(usdata);
       var tdata = create_dict(tdatas, yee);
 
       allx.domain([d3.min(alltemp, function(d) { return d3.timeParse("%Y")(+d.Year); }),
@@ -993,8 +923,8 @@ Comparison Graphs
 	  .duration(2000)
 	  .call(d3.axisLeft(ally));
 
-      xtee.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
-      ytee.domain(d3.extent(usdata, function(d) { return +d.Total; }))
+      usx.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      usy.domain(d3.extent(usdata, function(d) { return +d.Total; }))
       xt.domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
       yt.domain(d3.extent(tdata, function(d) { return +d.Total; }))
 
@@ -1010,8 +940,8 @@ Comparison Graphs
 	  .duration(2000)
 	  .attr("fill", "none")
 	  .attr("d", d3.line()
-		.x(function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
-		.y(function(d) { return ytee(+d.Total) }))
+		.x(function(d) { return usx(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return usy(+d.Total) }))
           .attr("stroke", "#4ef943")
 	  .attr("stroke-width", 2);
 
@@ -1024,8 +954,8 @@ Comparison Graphs
 	  .merge(usdots)
 	  .transition()
 	  .duration(2000)
-	  .attr("cx", function(d) { return xtee(d3.timeParse("%Y")(+d.Year)); })
-	  .attr("cy", function(d) { return ytee(+d.Total) })
+	  .attr("cx", function(d) { return usx(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return usy(+d.Total) })
 	  .attr("r", 6)
 	  .attr("fill",  "#4ef943");
 
@@ -1063,18 +993,1672 @@ Comparison Graphs
 
 
   }
-  
 
   var forwardscroll = document.getElementById("change3");
   forwardscroll.addEventListener('click', go_forward_temp);
 
   var backwardscroll = document.getElementById("change4");
   backwardscroll.addEventListener('click', go_backward_temp);
+
+  /// FINAL GRAPH ///
+
+  var is_num = function(value) {
+      if (typeof(value) != "number") {
+	  return 0;
+      }
+      else {
+	  return value;
+      }
+  }
+
+  var canvas2;
+
+  var ye = 1901;
+  console.log(country2);
+
+  var render_countries_graph = function() {
+
+      document.getElementById("us").checked = false;
+      document.getElementById("canada").checked = false;
+      document.getElementById("germany").checked = false;
+      document.getElementById("greece").checked = false;
+      document.getElementById("india").checked = false;
+      document.getElementById("poland").checked = false;
+      document.getElementById("spain").checked = false;
+      document.getElementById("sweden").checked = false;
+      document.getElementById("uk").checked = false;
+
+      var usdatas = pick(country2['UNITED STATES OF AMERICA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      var canadadatas = pick(country2['CANADA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      var germanydatas = pick(country2['GERMANY'], [ye, ye+1, ye+2, ye+3, ye+4,
+						    ye+5, ye+6, ye+7, ye+8, ye+9]);
+      var greecedatas = pick(country2['CHINA (MAINLAND)'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      var indiadatas = pick(country2['INDIA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						ye+5, ye+6, ye+7, ye+8, ye+9])
+      var polanddatas = pick(country2['POLAND'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9])
+      var spaindatas = pick(country2['SPAIN'], [ye, ye+1, ye+2, ye+3, ye+4,
+						ye+5, ye+6, ye+7, ye+8, ye+9])
+      var swedendatas = pick(country2['SWEDEN'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9])
+      var ukdatas = pick(country2['UNITED KINGDOM'], [ye, ye+1, ye+2, ye+3, ye+4,
+						      ye+5, ye+6, ye+7, ye+8, ye+9])
+      
+      canadadata = create_dict(canadadatas, ye);
+      usdata = create_dict(usdatas, ye);
+      germanydata = create_dict(germanydatas, ye);
+      greecedata = create_dict(greecedatas, ye);
+      indiadata = create_dict(indiadatas, ye);
+      polanddata = create_dict(polanddatas, ye);
+      spaindata = create_dict(spaindatas, ye);
+      swedendata = create_dict(swedendatas, ye);
+      ukdata = create_dict(ukdatas, ye);
+
+      const maxy = Math.max( d3.max(canadadata, function(d) { return +d.Total; }),
+			     d3.max(usdata, function(d) { return +d.Total; }),
+			     d3.max(germanydata, function(d) { return +d.Total; }),
+			     is_num(d3.max(greecedata, function(d) { return +d.Total; })),
+			     d3.max(indiadata, function(d) { return +d.Total; }),
+			     d3.max(polanddata, function(d) { return +d.Total; }),
+			     d3.max(spaindata, function(d) { return +d.Total; }),
+			     d3.max(swedendata, function(d) { return +d.Total; }),
+			     d3.max(ukdata, function(d) { return +d.Total; }) ) 
+
+      var margin = {top: 50, right: 100, bottom: 60, left: 100},
+	  width = 800 - margin.left - margin.right,
+	  height = 600 - margin.top - margin.bottom;
+
+      canvas2 = d3.select("#space3")
+	  .append("svg")
+	  .attr("width", width + margin.left + margin.right)
+	  .attr("height", height + margin.top + margin.bottom)
+	  .attr("style", "border:4px solid green")
+	  .append("g")
+	  .attr("transform",
+		"translate(" + margin.left + "," + margin.top + ")");
+      
+      xc = d3.scaleTime()
+	  .domain(d3.extent(canadadata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      canvas2.append("g")
+	  .attr("transform", "translate(0," + height + ")")
+	  .attr("class", "water")
+	  .call(d3.axisBottom(xc))
+	  .append("text")
+	  .attr("font-size", "14px")
+	  .attr("x", 300)
+	  .attr("y", 35)
+          .attr("stroke", "black")
+          .text("Years");
+      
+      yc = d3.scaleLinear()
+	  .domain([ 0, maxy ])
+	  .range([ height, 0 ]);
+      canvas2.append("g")
+	  .attr("class", "fire")
+	  .call(d3.axisLeft(yc))
+	  .append("text")
+	  .attr("transform", "rotate(-90)")
+          .attr("dy", "-4.5em")
+	  .attr("dx", "-4.0em")
+	  .attr("font-size", "14px")
+	  .attr("x", 20)
+          .attr("stroke", "black")
+          .text("Total carbon emissions (million metric tons of C)");
+
+      xus = d3.scaleTime()
+	  .domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      yus = d3.scaleLinear()
+	  .domain([ 0, maxy ])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(usdata)
+	  .attr("class", "usaline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xus(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yus(+d.Total); }))
+	  .attr("stroke", "red")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+
+      xcanada = d3.scaleTime()
+	  .domain(d3.extent(canadadata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      ycanada = d3.scaleLinear()
+	  .domain([ 0, maxy])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(canadadata)
+	  .attr("class", "canadaline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ycanada(+d.Total); }))
+	  .attr("stroke", "orange")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+
+      xgermany = d3.scaleTime()
+	  .domain(d3.extent(germanydata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      ygermany = d3.scaleLinear()
+	  .domain([ 0, maxy])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(germanydata)
+	  .attr("class", "germanyline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgermany(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygermany(+d.Total); }))
+	  .attr("stroke", "green")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+
+      xgreece = d3.scaleTime()
+	  .domain(d3.extent(greecedata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      ygreece = d3.scaleLinear()
+	  .domain([ 0, maxy])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(greecedata)
+	  .attr("class", "greeceline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygreece(+d.Total); }))
+	  .attr("stroke", "blue")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+      
+      xindia = d3.scaleTime()
+	  .domain(d3.extent(indiadata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      yindia = d3.scaleLinear()
+	  .domain([ 0, maxy])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(indiadata)
+	  .attr("class", "indialine")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yindia(+d.Total); }))
+	  .attr("stroke", " #ff74fb ")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+
+      xpoland = d3.scaleTime()
+	  .domain(d3.extent(polanddata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      ypoland = d3.scaleLinear()
+	  .domain([ 0, maxy])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(polanddata)
+	  .attr("class", "polandline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ypoland(+d.Total); }))
+	  .attr("stroke", "#9503a9")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+
+      xspain = d3.scaleTime()
+	  .domain(d3.extent(spaindata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      yspain = d3.scaleLinear()
+	  .domain([ 0, maxy])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(spaindata)
+	  .attr("class", "spainline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yspain(+d.Total); }))
+	  .attr("stroke", "gray")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+
+      xsweden = d3.scaleTime()
+	  .domain(d3.extent(swedendata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      ysweden = d3.scaleLinear()
+	  .domain([ 0, maxy])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(swedendata)
+	  .attr("class", "swedenline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ysweden(+d.Total); }))
+	  .attr("stroke", "#65e354")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+
+      xuk = d3.scaleTime()
+	  .domain(d3.extent(ukdata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	  .range([ 0, width ]);
+      yuk = d3.scaleLinear()
+	  .domain([ 0, maxy])
+	  .range([ height, 0])
+      canvas2.append("path")
+	  .datum(ukdata)
+	  .attr("class", "ukline")
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yuk(+d.Total); }))
+	  .attr("stroke", " #47dde4 ")
+	  .attr("stroke-width", 2)
+	  .attr("display", "none");
+
+      // DOTS //
+
+      canvas2.selectAll(".usadot")
+	  .data(usdata)
+	  .enter().append("circle")
+	  .attr("class", "usadot") 
+	  .attr("cx", function(d) { return xus(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yus(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "red")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+      canvas2.selectAll(".canadadot")
+	  .data(canadadata)
+	  .enter().append("circle")
+	  .attr("class", "canadadot") 
+	  .attr("cx", function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ycanada(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "orange")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+      /*
+      canvas2.selectAll(".germanydot")
+	  .data(germanydata)
+	  .enter().append("circle")
+	  .attr("class", "germanydot") 
+	  .attr("cx", function(d) { return xgermany(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ygermany(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "green")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+      canvas2.selectAll(".chinadot")
+	  .data(greecedata)
+	  .enter().append("circle")
+	  .attr("class", "chinadot") 
+	  .attr("cx", function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ygreece(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "blue")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+*/
+      canvas2.selectAll(".indiadot")
+	  .data(indiadata)
+	  .enter().append("circle")
+	  .attr("class", "indiadot") 
+	  .attr("cx", function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yindia(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "#ff74fb")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+      canvas2.selectAll(".polanddot")
+	  .data(polanddata)
+	  .enter().append("circle")
+	  .attr("class", "polanddot") 
+	  .attr("cx", function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ypoland(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "#9503a9")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+      canvas2.selectAll(".spaindot")
+	  .data(spaindata)
+	  .enter().append("circle")
+	  .attr("class", "spaindot") 
+	  .attr("cx", function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yspain(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "gray")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+      canvas2.selectAll(".swedendot")
+	  .data(swedendata)
+	  .enter().append("circle")
+	  .attr("class", "swedendot") 
+	  .attr("cx", function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ysweden(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "#65e354")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+      canvas2.selectAll(".ukdot")
+	  .data(ukdata)
+	  .enter().append("circle")
+	  .attr("class", "ukdot") 
+	  .attr("cx", function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yuk(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill", "#47dde4")
+	  .attr("display", "none")
+      //.on('mouseover', tip.show)
+      //.on('mouseout', tip.hide);
+ 
+  };
+
+  render_countries_graph();
+  var usRemoved = false;
+
+  var countries_go_forward = function() {
+      
+      if (ye + 10 <= 2010) ye += 10;
+
+      usdatas = pick(country2['UNITED STATES OF AMERICA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      canadadatas = pick(country2['CANADA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      germanydatas = pick(country2['GERMANY'], [ye, ye+1, ye+2, ye+3, ye+4,
+						    ye+5, ye+6, ye+7, ye+8, ye+9]);
+      greecedatas = pick(country2['CHINA (MAINLAND)'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      indiadatas = pick(country2['INDIA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						ye+5, ye+6, ye+7, ye+8, ye+9])
+      polanddatas = pick(country2['POLAND'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9])
+      spaindatas = pick(country2['SPAIN'], [ye, ye+1, ye+2, ye+3, ye+4,
+						ye+5, ye+6, ye+7, ye+8, ye+9])
+      swedendatas = pick(country2['SWEDEN'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9])
+      ukdatas = pick(country2['UNITED KINGDOM'], [ye, ye+1, ye+2, ye+3, ye+4,
+						      ye+5, ye+6, ye+7, ye+8, ye+9])
+      
+      canadadata = create_dict(canadadatas, ye);
+      usdata = create_dict(usdatas, ye);
+      germanydata = create_dict(germanydatas, ye);
+      greecedata = create_dict(greecedatas, ye);
+      indiadata = create_dict(indiadatas, ye);
+      polanddata = create_dict(polanddatas, ye);
+      spaindata = create_dict(spaindatas, ye);
+      swedendata = create_dict(swedendatas, ye);
+      ukdata = create_dict(ukdatas, ye);
+
+      if (usRemoved) {
+	  maxy = Math.max( is_num(d3.max(canadadata, function(d) { return +d.Total; })),
+			   //is_num(d3.max(usdata, function(d) { return +d.Total; })),
+			   is_num(d3.max(germanydata, function(d) { return +d.Total; })),
+			   is_num(d3.max(greecedata, function(d) { return +d.Total; })),
+			   is_num(d3.max(indiadata, function(d) { return +d.Total; })),
+			   is_num(d3.max(polanddata, function(d) { return +d.Total; })),
+			   is_num(d3.max(spaindata, function(d) { return +d.Total; })),
+			   is_num(d3.max(swedendata, function(d) { return +d.Total; })),
+			   is_num(d3.max(ukdata, function(d) { return +d.Total; })) )
+
+	  xc.domain(d3.extent(canadadata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	      .range([ 0, 600 ]);
+	  canvas2.select(".water")
+	      .transition()
+	      .duration(2000)
+	      .call(d3.axisBottom(xc));
+
+	  yc.domain([ 0, maxy ])
+	  canvas2.select(".fire")
+	      .transition()
+	      .duration(2000)
+	      .call(d3.axisLeft(yc));
+
+	  xus.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+	  yus.domain(d3.extent(usdata, function(d) { return +d.Total; }))
+      }
+      else {
+	  maxy = Math.max( is_num(d3.max(canadadata, function(d) { return +d.Total; })),
+			   is_num(d3.max(usdata, function(d) { return +d.Total; })),
+			   is_num(d3.max(germanydata, function(d) { return +d.Total; })),
+			   is_num(d3.max(greecedata, function(d) { return +d.Total; })),
+			   is_num(d3.max(indiadata, function(d) { return +d.Total; })),
+			   is_num(d3.max(polanddata, function(d) { return +d.Total; })),
+			   is_num(d3.max(spaindata, function(d) { return +d.Total; })),
+			   is_num(d3.max(swedendata, function(d) { return +d.Total; })),
+			   is_num(d3.max(ukdata, function(d) { return +d.Total; })) )
+
+	  xc.domain(d3.extent(canadadata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	      .range([ 0, 600 ]);
+	  canvas2.select(".water")
+	      .transition()
+	      .duration(2000)
+	      .call(d3.axisBottom(xc));
+
+	  yc.domain([ 0, maxy ])
+	  canvas2.select(".fire")
+	      .transition()
+	      .duration(2000)
+	      .call(d3.axisLeft(yc));
+
+	  xus.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+	  yus.domain([ 0, maxy])
+
+	  var usaline = canvas2.selectAll(".usaline")
+	      .datum(usdata);
+	  usaline
+	      .enter().append("path")
+	      .datum(usdata)
+	      .attr("class", "usaline")
+	      .merge(usaline)
+	      .transition()
+	      .duration(2000)
+	      .attr("fill", "none")
+	      .attr("d", d3.line()
+		    .x(function(d) { return xus(d3.timeParse("%Y")(+d.Year)); })
+		    .y(function(d) { return yus(+d.Total) }))
+              .attr("stroke", "red")
+	      .attr("stroke-width", 2);
+	  var usadots = canvas2.selectAll(".usadot")
+	      .data(usdata);
+	  usadots
+	      .enter().append("circle")
+	      .attr("class", "usadot")
+	      .merge(usadots)
+	      .transition()
+	      .duration(2000)
+	      .attr("cx", function(d) { return xus(d3.timeParse("%Y")(+d.Year)); })
+	      .attr("cy", function(d) { return yus(+d.Total) })
+	      .attr("r", 4)
+	      .attr("fill",  "red");
+
+      }
+	  
+      xcanada.domain(d3.extent(canadadata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ycanada.domain([ 0, maxy])
+      xgermany.domain(d3.extent(germanydata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ygermany.domain([ 0, maxy ])
+      xgreece.domain(d3.extent(greecedata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ygreece.domain([ 0, maxy])
+      xindia.domain(d3.extent(indiadata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      yindia.domain([ 0, maxy])
+      xpoland.domain(d3.extent(polanddata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ypoland.domain([ 0, maxy])
+      xspain.domain(d3.extent(spaindata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      yspain.domain([ 0, maxy])
+      xsweden.domain(d3.extent(swedendata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ysweden.domain([ 0, maxy])
+      xuk.domain(d3.extent(ukdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      yuk.domain([ 0, maxy])
+
+      var canadaline = canvas2.selectAll(".canadaline")
+	  .datum(canadadata);
+      canadaline
+	  .enter().append("path")
+	  .datum(canadadata)
+	  .attr("class", "canadaline")
+	  .merge(canadaline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ycanada(+d.Total) }))
+          .attr("stroke", "orange")
+	  .attr("stroke-width", 2);
+
+      var germanyline = canvas2.selectAll(".germanyline")
+	  .datum(germanydata);
+      germanyline
+	  .enter().append("path")
+	  .datum(germanydata)
+	  .attr("class", "germanyline")
+	  .merge(germanyline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgermany(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygermany(+d.Total) }))
+          .attr("stroke", "green")
+	  .attr("stroke-width", 2);
+
+      var greeceline = canvas2.selectAll(".greeceline")
+	  .datum(greecedata);
+      greeceline
+	  .enter().append("path")
+	  .datum(greecedata)
+	  .attr("class", "greeceline")
+	  .merge(greeceline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygreece(+d.Total) }))
+          .attr("stroke", "blue")
+	  .attr("stroke-width", 2);
+
+      var indialine = canvas2.selectAll(".indialine")
+	  .datum(indiadata);
+      indialine
+	  .enter().append("path")
+	  .datum(indiadata)
+	  .attr("class", "indialine")
+	  .merge(indialine)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yindia(+d.Total) }))
+          .attr("stroke", " #ff74fb ")
+	  .attr("stroke-width", 2);
+
+      var polandline = canvas2.selectAll(".polandline")
+	  .datum(polanddata);
+      polandline
+	  .enter().append("path")
+	  .datum(polanddata)
+	  .attr("class", "polandline")
+	  .merge(polandline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ypoland(+d.Total) }))
+          .attr("stroke", "#9503a9")
+	  .attr("stroke-width", 2);
+
+      var spainline = canvas2.selectAll(".spainline")
+	  .datum(spaindata);
+      spainline
+	  .enter().append("path")
+	  .datum(spaindata)
+	  .attr("class", "spainline")
+	  .merge(spainline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yspain(+d.Total) }))
+          .attr("stroke", "gray")
+	  .attr("stroke-width", 2);
+
+      var swedenline = canvas2.selectAll(".swedenline")
+	  .datum(swedendata);
+      swedenline
+	  .enter().append("path")
+	  .datum(swedendata)
+	  .attr("class", "swedenline")
+	  .merge(swedenline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ysweden(+d.Total) }))
+          .attr("stroke", "#65e354")
+	  .attr("stroke-width", 2);
+
+      var ukline = canvas2.selectAll(".ukline")
+	  .datum(ukdata);
+      ukline
+	  .enter().append("path")
+	  .datum(ukdata)
+	  .attr("class", "ukline")
+	  .merge(ukline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yuk(+d.Total) }))
+          .attr("stroke", " #47dde4 ")
+	  .attr("stroke-width", 2);
+
+      // DOTSS //
+      var canadadots = canvas2.selectAll(".canadadot")
+	  .data(canadadata);
+      canadadots
+	  .enter().append("circle")
+	  .attr("class", "canadadot")
+	  .merge(canadadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ycanada(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "orange");
+      var indiadots = canvas2.selectAll(".indiadot")
+	  .data(indiadata);
+      indiadots
+	  .enter().append("circle")
+	  .attr("class", "indiadot")
+	  .merge(indiadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yindia(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#ff74fb");
+      var polanddots = canvas2.selectAll(".polanddot")
+	  .data(polanddata);
+      polanddots
+	  .enter().append("circle")
+	  .attr("class", "polanddot")
+	  .merge(polanddots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ypoland(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#9503a9");
+      var spaindots = canvas2.selectAll(".spaindot")
+	  .data(spaindata);
+      spaindots
+	  .enter().append("circle")
+	  .attr("class", "spaindot")
+	  .merge(spaindots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yspain(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "gray");
+      var swedendots = canvas2.selectAll(".swedendot")
+	  .data(swedendata);
+      swedendots
+	  .enter().append("circle")
+	  .attr("class", "swedendot")
+	  .merge(swedendots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ysweden(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#65e354");
+      var ukdots = canvas2.selectAll(".ukdot")
+	  .data(ukdata);
+      ukdots
+	  .enter().append("circle")
+	  .attr("class", "ukdot")
+	  .merge(ukdots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yuk(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#47dde4");
+      
+      
+      
+  }
+
+
+  var countries_go_back = function() {
+
+      if (ye - 10 >= 1901) ye -= 10;
+      
+      usdatas = pick(country2['UNITED STATES OF AMERICA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      canadadatas = pick(country2['CANADA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      germanydatas = pick(country2['GERMANY'], [ye, ye+1, ye+2, ye+3, ye+4,
+						    ye+5, ye+6, ye+7, ye+8, ye+9]);
+      greecedatas = pick(country2['CHINA (MAINLAND)'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9]);
+      indiadatas = pick(country2['INDIA'], [ye, ye+1, ye+2, ye+3, ye+4,
+						ye+5, ye+6, ye+7, ye+8, ye+9])
+      polanddatas = pick(country2['POLAND'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9])
+      spaindatas = pick(country2['SPAIN'], [ye, ye+1, ye+2, ye+3, ye+4,
+						ye+5, ye+6, ye+7, ye+8, ye+9])
+      swedendatas = pick(country2['SWEDEN'], [ye, ye+1, ye+2, ye+3, ye+4,
+						  ye+5, ye+6, ye+7, ye+8, ye+9])
+      ukdatas = pick(country2['UNITED KINGDOM'], [ye, ye+1, ye+2, ye+3, ye+4,
+						      ye+5, ye+6, ye+7, ye+8, ye+9])
+      
+      canadadata = create_dict(canadadatas, ye);
+      usdata = create_dict(usdatas, ye);
+      germanydata = create_dict(germanydatas, ye);
+      greecedata = create_dict(greecedatas, ye);
+      indiadata = create_dict(indiadatas, ye);
+      polanddata = create_dict(polanddatas, ye);
+      spaindata = create_dict(spaindatas, ye);
+      swedendata = create_dict(swedendatas, ye);
+      ukdata = create_dict(ukdatas, ye);
+
+      if (usRemoved) {
+	  maxy = Math.max( is_num(d3.max(canadadata, function(d) { return +d.Total; })),
+			   //is_num(d3.max(usdata, function(d) { return +d.Total; })),
+			   is_num(d3.max(germanydata, function(d) { return +d.Total; })),
+			   is_num(d3.max(greecedata, function(d) { return +d.Total; })),
+			   is_num(d3.max(indiadata, function(d) { return +d.Total; })),
+			   is_num(d3.max(polanddata, function(d) { return +d.Total; })),
+			   is_num(d3.max(spaindata, function(d) { return +d.Total; })),
+			   is_num(d3.max(swedendata, function(d) { return +d.Total; })),
+			   is_num(d3.max(ukdata, function(d) { return +d.Total; })) )
+
+	  xc.domain(d3.extent(canadadata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	      .range([ 0, 600 ]);
+	  canvas2.select(".water")
+	      .transition()
+	      .duration(2000)
+	      .call(d3.axisBottom(xc));
+
+	  yc.domain([ 0, maxy ])
+	  canvas2.select(".fire")
+	      .transition()
+	      .duration(2000)
+	      .call(d3.axisLeft(yc));
+
+	  xus.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+	  yus.domain(d3.extent(usdata, function(d) { return +d.Total; }))
+      }
+      else {
+	  maxy = Math.max( is_num(d3.max(canadadata, function(d) { return +d.Total; })),
+			   is_num(d3.max(usdata, function(d) { return +d.Total; })),
+			   is_num(d3.max(germanydata, function(d) { return +d.Total; })),
+			   is_num(d3.max(greecedata, function(d) { return +d.Total; })),
+			   is_num(d3.max(indiadata, function(d) { return +d.Total; })),
+			   is_num(d3.max(polanddata, function(d) { return +d.Total; })),
+			   is_num(d3.max(spaindata, function(d) { return +d.Total; })),
+			   is_num(d3.max(swedendata, function(d) { return +d.Total; })),
+			   is_num(d3.max(ukdata, function(d) { return +d.Total; })) )
+
+	  xc.domain(d3.extent(canadadata, function(d) { return d3.timeParse("%Y")(d.Year); }))
+	      .range([ 0, 600 ]);
+	  canvas2.select(".water")
+	      .transition()
+	      .duration(2000)
+	      .call(d3.axisBottom(xc));
+
+	  yc.domain([ 0, maxy ])
+	  canvas2.select(".fire")
+	      .transition()
+	      .duration(2000)
+	      .call(d3.axisLeft(yc));
+
+	  xus.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+	  yus.domain([ 0, maxy])
+
+	  var usaline = canvas2.selectAll(".usaline")
+	      .datum(usdata);
+	  usaline
+	      .enter().append("path")
+	      .datum(usdata)
+	      .attr("class", "usaline")
+	      .merge(usaline)
+	      .transition()
+	      .duration(2000)
+	      .attr("fill", "none")
+	      .attr("d", d3.line()
+		    .x(function(d) { return xus(d3.timeParse("%Y")(+d.Year)); })
+		    .y(function(d) { return yus(+d.Total) }))
+              .attr("stroke", "red")
+	      .attr("stroke-width", 2);
+	  var usadots = canvas2.selectAll(".usadot")
+	      .data(usdata);
+	  usadots
+	      .enter().append("circle")
+	      .attr("class", "usadot")
+	      .merge(usadots)
+	      .transition()
+	      .duration(2000)
+	      .attr("cx", function(d) { return xus(d3.timeParse("%Y")(+d.Year)); })
+	      .attr("cy", function(d) { return yus(+d.Total) })
+	      .attr("r", 4)
+	      .attr("fill",  "red");
+
+      }
+      
+      xcanada.domain(d3.extent(canadadata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ycanada.domain([ 0, maxy])
+      xgermany.domain(d3.extent(germanydata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ygermany.domain([ 0, maxy ])
+      xgreece.domain(d3.extent(greecedata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ygreece.domain([ 0, maxy])
+      xindia.domain(d3.extent(indiadata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      yindia.domain([ 0, maxy])
+      xpoland.domain(d3.extent(polanddata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ypoland.domain([ 0, maxy])
+      xspain.domain(d3.extent(spaindata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      yspain.domain([ 0, maxy])
+      xsweden.domain(d3.extent(swedendata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      ysweden.domain([ 0, maxy])
+      xuk.domain(d3.extent(ukdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
+      yuk.domain([ 0, maxy])
+
+      var canadaline = canvas2.selectAll(".canadaline")
+	  .datum(canadadata);
+      canadaline
+	  .enter().append("path")
+	  .datum(canadadata)
+	  .attr("class", "canadaline")
+	  .merge(canadaline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ycanada(+d.Total) }))
+          .attr("stroke", "orange")
+	  .attr("stroke-width", 2);
+
+      var germanyline = canvas2.selectAll(".germanyline")
+	  .datum(germanydata);
+      germanyline
+	  .enter().append("path")
+	  .datum(germanydata)
+	  .attr("class", "germanyline")
+	  .merge(germanyline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgermany(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygermany(+d.Total) }))
+          .attr("stroke", "green")
+	  .attr("stroke-width", 2);
+
+      var greeceline = canvas2.selectAll(".greeceline")
+	  .datum(greecedata);
+      greeceline
+	  .enter().append("path")
+	  .datum(greecedata)
+	  .attr("class", "greeceline")
+	  .merge(greeceline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygreece(+d.Total) }))
+          .attr("stroke", "blue")
+	  .attr("stroke-width", 2);
+
+      var indialine = canvas2.selectAll(".indialine")
+	  .datum(indiadata);
+      indialine
+	  .enter().append("path")
+	  .datum(indiadata)
+	  .attr("class", "indialine")
+	  .merge(indialine)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yindia(+d.Total) }))
+          .attr("stroke", " #ff74fb ")
+	  .attr("stroke-width", 2);
+
+      var polandline = canvas2.selectAll(".polandline")
+	  .datum(polanddata);
+      polandline
+	  .enter().append("path")
+	  .datum(polanddata)
+	  .attr("class", "polandline")
+	  .merge(polandline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ypoland(+d.Total) }))
+          .attr("stroke", "#9503a9")
+	  .attr("stroke-width", 2);
+
+      var spainline = canvas2.selectAll(".spainline")
+	  .datum(spaindata);
+      spainline
+	  .enter().append("path")
+	  .datum(spaindata)
+	  .attr("class", "spainline")
+	  .merge(spainline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yspain(+d.Total) }))
+          .attr("stroke", "gray")
+	  .attr("stroke-width", 2);
+
+      var swedenline = canvas2.selectAll(".swedenline")
+	  .datum(swedendata);
+      swedenline
+	  .enter().append("path")
+	  .datum(swedendata)
+	  .attr("class", "swedenline")
+	  .merge(swedenline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ysweden(+d.Total) }))
+          .attr("stroke", "#65e354")
+	  .attr("stroke-width", 2);
+
+      var ukline = canvas2.selectAll(".ukline")
+	  .datum(ukdata);
+      ukline
+	  .enter().append("path")
+	  .datum(ukdata)
+	  .attr("class", "ukline")
+	  .merge(ukline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yuk(+d.Total) }))
+          .attr("stroke", " #47dde4 ")
+	  .attr("stroke-width", 2);
+
+      var canadadots = canvas2.selectAll(".canadadot")
+	  .data(canadadata);
+      canadadots
+	  .enter().append("circle")
+	  .attr("class", "canadadot")
+	  .merge(canadadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ycanada(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "orange");
+      var indiadots = canvas2.selectAll(".indiadot")
+	  .data(indiadata);
+      indiadots
+	  .enter().append("circle")
+	  .attr("class", "indiadot")
+	  .merge(indiadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yindia(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#ff74fb");
+      var polanddots = canvas2.selectAll(".polanddot")
+	  .data(polanddata);
+      polanddots
+	  .enter().append("circle")
+	  .attr("class", "polanddot")
+	  .merge(polanddots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ypoland(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#9503a9");
+      var spaindots = canvas2.selectAll(".spaindot")
+	  .data(spaindata);
+      spaindots
+	  .enter().append("circle")
+	  .attr("class", "spaindot")
+	  .merge(spaindots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yspain(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "gray");
+      var swedendots = canvas2.selectAll(".swedendot")
+	  .data(swedendata);
+      swedendots
+	  .enter().append("circle")
+	  .attr("class", "swedendot")
+	  .merge(swedendots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ysweden(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#65e354");
+      var ukdots = canvas2.selectAll(".ukdot")
+	  .data(ukdata);
+      ukdots
+	  .enter().append("circle")
+	  .attr("class", "ukdot")
+	  .merge(ukdots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yuk(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#47dde4");
+
+  }
+
+  var country_forward = document.getElementById("change5");
+  country_forward.addEventListener('click', countries_go_forward);
+  var country_back = document.getElementById("change6");
+  country_back.addEventListener('click', countries_go_back);
+
+  var remove_usa = function() {
+      usRemoved = true;
+      canvas2.selectAll(".usaline")
+	  .attr("display", "none");
+      canvas2.selectAll(".usadot")
+	  .attr("display","none");
+
+      document.getElementById("us").checked = false;
+      maxy = Math.max( is_num(d3.max(canadadata, function(d) { return +d.Total; })),
+			   is_num(d3.max(germanydata, function(d) { return +d.Total; })),
+			   is_num(d3.max(greecedata, function(d) { return +d.Total; })),
+			   is_num(d3.max(indiadata, function(d) { return +d.Total; })),
+			   is_num(d3.max(polanddata, function(d) { return +d.Total; })),
+			   is_num(d3.max(spaindata, function(d) { return +d.Total; })),
+			   is_num(d3.max(swedendata, function(d) { return +d.Total; })),
+			   is_num(d3.max(ukdata, function(d) { return +d.Total; })) )
+
+      yc.domain([ 0, maxy ])
+      canvas2.select(".fire")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisLeft(yc));
+
+      ycanada.domain([ 0, maxy])
+      ygermany.domain([ 0, maxy ])
+      ygreece.domain([ 0, maxy])
+      yindia.domain([ 0, maxy])
+      ypoland.domain([ 0, maxy])
+      yspain.domain([ 0, maxy])
+      ysweden.domain([ 0, maxy])
+      yuk.domain([ 0, maxy])
+
+      var canadaline = canvas2.selectAll(".canadaline")
+	  .datum(canadadata);
+      canadaline
+	  .enter().append("path")
+	  .datum(canadadata)
+	  .attr("class", "canadaline")
+	  .merge(canadaline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ycanada(+d.Total) }))
+          .attr("stroke", "orange")
+	  .attr("stroke-width", 2);
+
+      var germanyline = canvas2.selectAll(".germanyline")
+	  .datum(germanydata);
+      germanyline
+	  .enter().append("path")
+	  .datum(germanydata)
+	  .attr("class", "germanyline")
+	  .merge(germanyline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgermany(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygermany(+d.Total) }))
+          .attr("stroke", "green")
+	  .attr("stroke-width", 2);
+
+      var greeceline = canvas2.selectAll(".greeceline")
+	  .datum(greecedata);
+      greeceline
+	  .enter().append("path")
+	  .datum(greecedata)
+	  .attr("class", "greeceline")
+	  .merge(greeceline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygreece(+d.Total) }))
+          .attr("stroke", "blue")
+	  .attr("stroke-width", 2);
+
+      var indialine = canvas2.selectAll(".indialine")
+	  .datum(indiadata);
+      indialine
+	  .enter().append("path")
+	  .datum(indiadata)
+	  .attr("class", "indialine")
+	  .merge(indialine)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yindia(+d.Total) }))
+          .attr("stroke", " #ff74fb ")
+	  .attr("stroke-width", 2);
+
+      var polandline = canvas2.selectAll(".polandline")
+	  .datum(polanddata);
+      polandline
+	  .enter().append("path")
+	  .datum(polanddata)
+	  .attr("class", "polandline")
+	  .merge(polandline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ypoland(+d.Total) }))
+          .attr("stroke", "#9503a9")
+	  .attr("stroke-width", 2);
+
+      var spainline = canvas2.selectAll(".spainline")
+	  .datum(spaindata);
+      spainline
+	  .enter().append("path")
+	  .datum(spaindata)
+	  .attr("class", "spainline")
+	  .merge(spainline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yspain(+d.Total) }))
+          .attr("stroke", "gray")
+	  .attr("stroke-width", 2);
+
+      var swedenline = canvas2.selectAll(".swedenline")
+	  .datum(swedendata);
+      swedenline
+	  .enter().append("path")
+	  .datum(swedendata)
+	  .attr("class", "swedenline")
+	  .merge(swedenline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ysweden(+d.Total) }))
+          .attr("stroke", "#65e354")
+	  .attr("stroke-width", 2);
+
+      var ukline = canvas2.selectAll(".ukline")
+	  .datum(ukdata);
+      ukline
+	  .enter().append("path")
+	  .datum(ukdata)
+	  .attr("class", "ukline")
+	  .merge(ukline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yuk(+d.Total) }))
+          .attr("stroke", " #47dde4 ")
+	  .attr("stroke-width", 2);
+
+      var canadadots = canvas2.selectAll(".canadadot")
+	  .data(canadadata);
+      canadadots
+	  .enter().append("circle")
+	  .attr("class", "canadadot")
+	  .merge(canadadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ycanada(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "orange");
+      var indiadots = canvas2.selectAll(".indiadot")
+	  .data(indiadata);
+      indiadots
+	  .enter().append("circle")
+	  .attr("class", "indiadot")
+	  .merge(indiadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yindia(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#ff74fb");
+      var polanddots = canvas2.selectAll(".polanddot")
+	  .data(polanddata);
+      polanddots
+	  .enter().append("circle")
+	  .attr("class", "polanddot")
+	  .merge(polanddots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ypoland(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#9503a9");
+      var spaindots = canvas2.selectAll(".spaindot")
+	  .data(spaindata);
+      spaindots
+	  .enter().append("circle")
+	  .attr("class", "spaindot")
+	  .merge(spaindots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yspain(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "gray");
+      var swedendots = canvas2.selectAll(".swedendot")
+	  .data(swedendata);
+      swedendots
+	  .enter().append("circle")
+	  .attr("class", "swedendot")
+	  .merge(swedendots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ysweden(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#65e354");
+      var ukdots = canvas2.selectAll(".ukdot")
+	  .data(ukdata);
+      ukdots
+	  .enter().append("circle")
+	  .attr("class", "ukdot")
+	  .merge(ukdots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yuk(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#47dde4");
+
+      document.getElementById("us").style.display = "none";
+      document.getElementById("us").innerHTML = "";
+      document.getElementById("removeus").innerHTML = 'Add USA';
+      
+  }
+
+  var add_usa = function(e) {
+      usRemoved = false;
+      canvas2.selectAll(".usaline")
+	  .attr("display", "block");
+      canvas2.selectAll(".usadot")
+	  .attr("display","block");
+      document.getElementById("us").checked = true;
+      maxy = Math.max( is_num(d3.max(canadadata, function(d) { return +d.Total; })),
+		       is_num(d3.max(usdata, function(d) { return +d.Total; })),
+		       is_num(d3.max(germanydata, function(d) { return +d.Total; })),
+		       is_num(d3.max(greecedata, function(d) { return +d.Total; })),
+		       is_num(d3.max(indiadata, function(d) { return +d.Total; })),
+		       is_num(d3.max(polanddata, function(d) { return +d.Total; })),
+		       is_num(d3.max(spaindata, function(d) { return +d.Total; })),
+		       is_num(d3.max(swedendata, function(d) { return +d.Total; })),
+		       is_num(d3.max(ukdata, function(d) { return +d.Total; })) )
+
+      yc.domain([ 0, maxy ])
+      canvas2.select(".fire")
+	  .transition()
+	  .duration(2000)
+	  .call(d3.axisLeft(yc));
+
+      yus.domain([0, maxy])
+      ycanada.domain([ 0, maxy])
+      ygermany.domain([ 0, maxy ])
+      ygreece.domain([ 0, maxy])
+      yindia.domain([ 0, maxy])
+      ypoland.domain([ 0, maxy])
+      yspain.domain([ 0, maxy])
+      ysweden.domain([ 0, maxy])
+      yuk.domain([ 0, maxy])
+
+      var canadaline = canvas2.selectAll(".canadaline")
+	  .datum(canadadata);
+      canadaline
+	  .enter().append("path")
+	  .datum(canadadata)
+	  .attr("class", "canadaline")
+	  .merge(canadaline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ycanada(+d.Total) }))
+          .attr("stroke", "orange")
+	  .attr("stroke-width", 2);
+
+      var usaline = canvas2.selectAll(".usaline")
+	  .datum(usdata);
+      usaline
+	  .enter().append("path")
+	  .datum(usdata)
+	  .attr("class", "usaline")
+	  .merge(usaline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xus(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yus(+d.Total) }))
+          .attr("stroke", "red")
+	  .attr("stroke-width", 2);
+
+      var germanyline = canvas2.selectAll(".germanyline")
+	  .datum(germanydata);
+      germanyline
+	  .enter().append("path")
+	  .datum(germanydata)
+	  .attr("class", "germanyline")
+	  .merge(germanyline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgermany(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygermany(+d.Total) }))
+          .attr("stroke", "green")
+	  .attr("stroke-width", 2);
+
+      var greeceline = canvas2.selectAll(".greeceline")
+	  .datum(greecedata);
+      greeceline
+	  .enter().append("path")
+	  .datum(greecedata)
+	  .attr("class", "greeceline")
+	  .merge(greeceline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xgreece(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ygreece(+d.Total) }))
+          .attr("stroke", "blue")
+	  .attr("stroke-width", 2);
+
+      var indialine = canvas2.selectAll(".indialine")
+	  .datum(indiadata);
+      indialine
+	  .enter().append("path")
+	  .datum(indiadata)
+	  .attr("class", "indialine")
+	  .merge(indialine)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yindia(+d.Total) }))
+          .attr("stroke", " #ff74fb ")
+	  .attr("stroke-width", 2);
+
+      var polandline = canvas2.selectAll(".polandline")
+	  .datum(polanddata);
+      polandline
+	  .enter().append("path")
+	  .datum(polanddata)
+	  .attr("class", "polandline")
+	  .merge(polandline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ypoland(+d.Total) }))
+          .attr("stroke", "#9503a9")
+	  .attr("stroke-width", 2);
+
+      var spainline = canvas2.selectAll(".spainline")
+	  .datum(spaindata);
+      spainline
+	  .enter().append("path")
+	  .datum(spaindata)
+	  .attr("class", "spainline")
+	  .merge(spainline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yspain(+d.Total) }))
+          .attr("stroke", "gray")
+	  .attr("stroke-width", 2);
+
+      var swedenline = canvas2.selectAll(".swedenline")
+	  .datum(swedendata);
+      swedenline
+	  .enter().append("path")
+	  .datum(swedendata)
+	  .attr("class", "swedenline")
+	  .merge(swedenline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return ysweden(+d.Total) }))
+          .attr("stroke", "#65e354")
+	  .attr("stroke-width", 2);
+
+      var ukline = canvas2.selectAll(".ukline")
+	  .datum(ukdata);
+      ukline
+	  .enter().append("path")
+	  .datum(ukdata)
+	  .attr("class", "ukline")
+	  .merge(ukline)
+	  .transition()
+	  .duration(2000)
+	  .attr("fill", "none")
+	  .attr("d", d3.line()
+		.x(function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+		.y(function(d) { return yuk(+d.Total) }))
+          .attr("stroke", " #47dde4 ")
+	  .attr("stroke-width", 2);
+
+      var canadadots = canvas2.selectAll(".canadadot")
+	  .data(canadadata);
+      canadadots
+	  .enter().append("circle")
+	  .attr("class", "canadadot")
+	  .merge(canadadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xcanada(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ycanada(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "orange");
+      var indiadots = canvas2.selectAll(".indiadot")
+	  .data(indiadata);
+      indiadots
+	  .enter().append("circle")
+	  .attr("class", "indiadot")
+	  .merge(indiadots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xindia(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yindia(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#ff74fb");
+      var polanddots = canvas2.selectAll(".polanddot")
+	  .data(polanddata);
+      polanddots
+	  .enter().append("circle")
+	  .attr("class", "polanddot")
+	  .merge(polanddots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xpoland(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ypoland(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#9503a9");
+      var spaindots = canvas2.selectAll(".spaindot")
+	  .data(spaindata);
+      spaindots
+	  .enter().append("circle")
+	  .attr("class", "spaindot")
+	  .merge(spaindots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xspain(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yspain(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "gray");
+      var swedendots = canvas2.selectAll(".swedendot")
+	  .data(swedendata);
+      swedendots
+	  .enter().append("circle")
+	  .attr("class", "swedendot")
+	  .merge(swedendots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xsweden(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return ysweden(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#65e354");
+      var ukdots = canvas2.selectAll(".ukdot")
+	  .data(ukdata);
+      ukdots
+	  .enter().append("circle")
+	  .attr("class", "ukdot")
+	  .merge(ukdots)
+	  .transition()
+	  .duration(2000)
+	  .attr("cx", function(d) { return xuk(d3.timeParse("%Y")(+d.Year)); })
+	  .attr("cy", function(d) { return yuk(+d.Total) })
+	  .attr("r", 4)
+	  .attr("fill",  "#47dde4");
+
+
+      document.getElementById("us").style.display = "block";
+      document.getElementById("us").innerHTML = "";
+      document.getElementById("removeus").innerHTML = 'Remove USA';
+  }
   
+  
+  var remus = document.getElementById("removeus");
+  remus.addEventListener('click', function(e){
+      if (usRemoved) {
+	  add_usa();
+      } else {
+	  remove_usa();
+      }
+      
+  });
+
+  var display = function(name) {
+
+      var linename = "." + name + "line";
+      var dotname = "." + name + "dot";
+      
+      canvas2.selectAll(linename)
+	  .attr("display", "block");
+
+      canvas2.selectAll(dotname)
+	  .attr("display", "block");
+
+  }
+
+  var dont_display = function(name) {
+
+      var linename = "." + name + "line";
+      var dotname = "." + name + "dot";
+      
+      canvas2.selectAll(linename)
+	  .attr("display", "none");
+
+      canvas2.selectAll(dotname)
+	  .attr("display", "none");
+  }
+
+  var checkUS = document.getElementById("us");
+  checkUS.addEventListener('click', function() {
+      if (this.checked) {
+	  display("usa");
+      } else {
+	  dont_display("usa");
+      }
+  });
+
+  document.getElementById("canada").addEventListener('click', function() {
+      if(this.checked) {
+	  display("canada");
+      } else {
+	  dont_display("canada");
+      }
+  });
+
+  document.getElementById("germany").addEventListener('click', function() {
+      if(this.checked) {
+	  display("germany");
+      } else {
+	  dont_display("germany");
+      }
+  });
+
+  document.getElementById("greece").addEventListener('click', function() {
+      if(this.checked) {
+	  display("greece");
+      } else {
+	  dont_display("greece");
+      }
+  });
+
+  document.getElementById("india").addEventListener('click', function() {
+      if(this.checked) {
+	  display("india");
+      } else {
+	  dont_display("india");
+      }
+  });
+
+  document.getElementById("poland").addEventListener('click', function() {
+      if(this.checked) {
+	  display("poland");
+      } else {
+	  dont_display("poland");
+      }
+  });
+
+  document.getElementById("spain").addEventListener('click', function() {
+      if(this.checked) {
+	  display("spain");
+      } else {
+	  dont_display("spain");
+      }
+  });
+
+  document.getElementById("sweden").addEventListener('click', function() {
+      if(this.checked) {
+	  display("sweden");
+      } else {
+	  dont_display("sweden");
+      }
+  });
+
+  document.getElementById("uk").addEventListener('click', function() {
+      if(this.checked) {
+	  display("uk");
+      } else {
+	  dont_display("uk");
+      }
+  });
+
 
 </script>
-
-
-
 
 {% endblock %}
