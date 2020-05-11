@@ -12,7 +12,7 @@ Hilary: Project Manager (prime minister), Flask
 
 ## Summary:
 
-Our website’s objective is to display climate change through graphs demonstrating the changes in temperature from 1901 to 2000, as well as CO2 emissions from fossil fuels globally. To use our site, the homepage will have three buttons labeled “Global Temperature Anomaly”, “U.S. Average Temperature Anomaly”, and “CO2 Emissions”. When each button is clicked, a graph will appear that shows these data over time. The graphs are interactive, so sliders can be used to move through time. When the buttons are clicked again, the graphs will collapse. An additional button labeled “Compare” will show a graph comparing temperature anomalies and CO2 emissions over time.
+Our website’s objective is to display climate change through graphs demonstrating the changes in temperature from 1901 to 2000, as well as CO2 emissions from fossil fuels globally. To use our site, the homepage will have three buttons labeled “Global Temperature Anomaly”, “Carbon Dioxide Emissions” and “Compare Data”. When each button is clicked, the user will be redirected to a page that has graphs displaying the specified data. The graphs are interactive, so the user can adjust the graphs to what they want to view. 
 
 ## How to Run this Project
 
