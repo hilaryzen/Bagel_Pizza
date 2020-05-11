@@ -62,3 +62,6 @@ aliceN -- 2020-05-11 02:03
 - Added one final graph to compare graphs page! Allows user to toggle between countries.
 - Finalized the design of the site, and added an enlightenment button
 
+aliceN -- 2020-05-11 02:11
+- Edited the design doc so it accurately describes what each page of the site contains
+- Removed files we ended up not using: data.py, data.js
