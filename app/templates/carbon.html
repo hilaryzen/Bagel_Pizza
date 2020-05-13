@@ -96,10 +96,6 @@ CO2 Emissions
       left: 0;
   }
 
-  .slidecontainer {
-      width: 100%; /* Width of the outside container */
-  }
-
   div.tooltip-pie {
      position: absolute;
      text-align: center;
@@ -117,9 +113,9 @@ CO2 Emissions
 
 <script>
 
+  // retrieve the data
   var cdatas = {{ globalEmissions }}
   var countryEmissions = {{ countryCO2 | safe }}
-  console.log(countryEmissions);
   
   var create_dict = function(data) {
       var dict = [];
@@ -130,6 +126,7 @@ CO2 Emissions
       return dict;
   }
 
+  // some helper functions!
   var pick = function (obj, props) {
 
       'use strict';
@@ -150,38 +147,34 @@ CO2 Emissions
 
   };
 
+  // the big dictionary
   var cdata = create_dict(cdatas);
-  
 
   ///////////////// LINE GRAPH ///////////////// 
 
 
   var render_line_graph = function(e) {
-
-      var parseTime = d3.timeParse("%Y")
-      bisectDate = d3.bisector(function(d) { return +d.Year; }).left;
     
-      var plot = d3.select("#plotchart"),
+      var plot = d3.select("#plotchart"),  // initialize the space for the graph
 	  margin = 200,
 	  width = plot.attr("width") - margin,
 	  height = plot.attr("height") - margin
 
-      var p = plot.append("g")
+      var p = plot.append("g") // sets the boundaries for the actual graph
 	  .attr("transform", "translate(" + 100 + "," + 100 + ")");
-
     
-      plot.append("text")
+      plot.append("text")  // graph title
 	  .attr("transform", "translate(100,0)")
 	  .attr("x", 400)
 	  .attr("y", 50)
 	  .attr("font-size", "28px")
 	  .text("CO2 Emissions vs. Years")
 
-      pxScale = d3.scaleTime()
+      pxScale = d3.scaleTime()  // retrieve x axis data
 	  .domain(d3.extent(cdata, function(d) { return d3.timeParse("%Y")(d.Year); }))
 	  .range([0, width])
 	  .nice();
-      xAxis = p.append("g")
+      xAxis = p.append("g")  // append the x axis
 	  .attr("transform", "translate(0," + height + ")")
 	  .call(d3.axisBottom(pxScale))
 	  .attr("class", "cows")
@@ -192,11 +185,11 @@ CO2 Emissions
           .attr("stroke", "black")
           .text("Years");
 
-      pyScale = d3.scaleLinear()
+      pyScale = d3.scaleLinear() // retireve the y axis data
         .domain([0, d3.max(cdata, function(d) { return +d.Total; })])
         .range([height, 0])
         .nice();
-        yAxis = p.append("g")
+        yAxis = p.append("g")  // append the y axis
           .attr("class", "cars")
           .attr("x", -50)
           .call(d3.axisLeft(pyScale))
@@ -208,7 +201,7 @@ CO2 Emissions
           .attr("stroke", "black")
           .text("Total carbon emissions (million metric tons of C)");
 
-      var clip = p.append("defs").append("svg:clipPath")
+      var clip = p.append("defs").append("svg:clipPath")  // for the brushing
           .attr("id", "clip")
           .append("svg:rect")
           .attr("width", width )
@@ -244,7 +237,7 @@ CO2 Emissions
       var idleTimeout
       function idled() { idleTimeout = null; }
 
-      function updateChart() {
+      function updateChart() {  
 
 	  // What are the selected boundaries?
 	  extent = d3.event.selection
@@ -257,8 +250,6 @@ CO2 Emissions
 	  else {
 	      pxScale
 		  .domain([ pxScale.invert(extent[0]), pxScale.invert(extent[1]) ])
-	      //pyScale
-	      //.domain([ (extent[0]), (extent[1]) ]);
 	      line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
 	  }
 
@@ -299,6 +290,7 @@ CO2 Emissions
   };
 
 
+  // some more helper functions!!
   var create_dict_range = function(data, y) {
       var dict = [];
       for(i = 0; i < Object.keys(data).length; i++) {
@@ -433,9 +425,9 @@ CO2 Emissions
 
       bars
 	  .exit()
-	  .remove(); //im assuming some kind of transition
+	  .remove(); // remove the previous bars
 
-      var new_bars = bars
+      var new_bars = bars  // the new bars
 	  .enter()
 	  .append('rect')
 	  .attr('class', 'bar')
@@ -471,7 +463,6 @@ CO2 Emissions
   var num = 0; // 0 is bar chart, 1 is line graph
 
   var hide_bar_chart = function(e) {
-      //d3.select("#barchart").remove();
       d3.select("#plotchart").selectAll("*").remove();
       document.getElementById("change_graphs").innerHTML = 'Change to Bar Chart';
       document.getElementById("year").style.display = "none";
@@ -512,27 +503,7 @@ CO2 Emissions
   
   //////////////////////////////	PIE CHARTS		////////////////////////////////
 
-  // some helper functions
-
-  var pick = function (obj, props) {
-
-      'use strict';
-
-      // Make sure object and properties are provided
-      if (!obj || !props) return;
-
-      // Create new object
-      var picked = {};
-
-      // Loop through props and push to new object
-      props.forEach(function(prop) {
-	  picked[prop] = obj[prop];
-      });
-
-      // Return new object
-      return picked;
-
-  };
+  // some even more helper functions!!
 
   var keys = Object.keys(countryEmissions);
   
