@@ -926,7 +926,7 @@ Comparison Graphs
       usx.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
       usy.domain(d3.extent(usdata, function(d) { return +d.Total; }))
       xt.domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
-      yt.domain(d3.extent(tdata, function(d) { return +d.Total; }))
+      yt.domain(d3.extent(alltemp, function(d) { return +d.Total; }))
 
       var usline = canvas.selectAll(".usline")
 	  .datum(usdata);
