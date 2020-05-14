@@ -926,7 +926,7 @@ Comparison Graphs
       usx.domain(d3.extent(usdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
       usy.domain(d3.extent(usdata, function(d) { return +d.Total; }))
       xt.domain(d3.extent(tdata, function(d) { return d3.timeParse("%Y")(+d.Year); }))
-      yt.domain(d3.extent(tdata, function(d) { return +d.Total; }))
+      yt.domain(d3.extent(alltemp, function(d) { return +d.Total; }))
 
       var usline = canvas.selectAll(".usline")
 	  .datum(usdata);
@@ -2529,6 +2529,18 @@ Comparison Graphs
 	  .attr("cy", function(d) { return ycanada(+d.Total) })
 	  .attr("r", 4)
 	  .attr("fill",  "orange");
+      var usadots = canvas2.selectAll(".usadot")
+	      .data(usdata);
+	  usadots
+	      .enter().append("circle")
+	      .attr("class", "usadot")
+	      .merge(usadots)
+	      .transition()
+	      .duration(2000)
+	      .attr("cx", function(d) { return xus(d3.timeParse("%Y")(+d.Year)); })
+	      .attr("cy", function(d) { return yus(+d.Total) })
+	      .attr("r", 4)
+	      .attr("fill",  "red");
       var indiadots = canvas2.selectAll(".indiadot")
 	  .data(indiadata);
       indiadots

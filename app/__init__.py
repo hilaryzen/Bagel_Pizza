@@ -16,9 +16,6 @@ usTempValue = {}
 # {1901: -0.15, 1902: -0.43, etc}
 usTempAnomaly = {}
 
-def fToc(value):
-    return (value - 32) / 1.80
-
 def importUsTemp(fileName):
     with open(fileName, 'r') as file:
         data = json.loads(file.read())['data']
@@ -136,6 +133,7 @@ def emissions():
 
 @app.route("/compare")
 def compare():
+    importGlobalCO2("static/co2-global.csv")
     return render_template("alldata.html", globalEmissions = globalco2, globalTemp = globalTemp, usTemp = usTempValue, usAnomaly = usTempAnomaly, countryEmissions = yearlyCountryCO2, countryCO2 = countryco2)
 
 if __name__ == "__main__":
